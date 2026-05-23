@@ -18,6 +18,7 @@ class ExampleInstrumentedTest {
     @Test
     fun useAppContext() {
         // Context of the app under test.
+        //Test line
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("com.example.mileagetracker", appContext.packageName)
     }

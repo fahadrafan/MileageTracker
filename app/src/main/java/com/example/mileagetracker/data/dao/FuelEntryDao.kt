@@ -1,0 +1,27 @@
+package com.example.mileagetracker.data.dao
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import com.example.mileagetracker.data.entity.FuelEntry
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface FuelEntryDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(entry: FuelEntry)
+
+    @Query("""
+        SELECT * FROM fuel_entries
+        WHERE vehicleId = :vehicleId
+        ORDER BY dateMillis DESC
+    """)
+    fun getEntriesForVehicle(
+        vehicleId: Long
+    ): Flow<List<FuelEntry>>
+
+    @Query("DELETE FROM fuel_entries WHERE id = :id")
+    suspend fun deleteEntry(id: Long)
+}
