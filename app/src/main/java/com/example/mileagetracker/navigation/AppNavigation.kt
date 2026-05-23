@@ -74,7 +74,8 @@ fun AppNavigation() {
                 viewModel<AddFuelViewModel>(
                     factory =
                         AddFuelViewModelFactory(
-                            app.container.fuelRepository
+                            app.container.fuelRepository,
+                            app.container.vehicleRepository
                         )
                 )
 

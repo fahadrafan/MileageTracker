@@ -3,9 +3,11 @@ package com.example.mileagetracker.ui.fuel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.mileagetracker.data.repository.FuelRepository
+import com.example.mileagetracker.data.repository.VehicleRepository
 
 class AddFuelViewModelFactory(
-        private val repository: FuelRepository
+    private val fuelRepository: FuelRepository,
+    private val vehicleRepository: VehicleRepository
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -20,7 +22,8 @@ class AddFuelViewModelFactory(
         ) {
 
             return AddFuelViewModel(
-                    repository
+                fuelRepository,
+                vehicleRepository
             ) as T
         }
 

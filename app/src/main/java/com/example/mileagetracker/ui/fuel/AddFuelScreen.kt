@@ -9,6 +9,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.material3.Checkbox
 import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,6 +22,12 @@ fun AddFuelScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
+    LaunchedEffect(vehicleId) {
+
+        viewModel.loadVehicleDefaults(
+            vehicleId
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -40,24 +49,61 @@ fun AddFuelScreen(
 
             OutlinedTextField(
                 value = uiState.odometer,
+                keyboardOptions =
+                    KeyboardOptions(
+                        keyboardType =
+                            KeyboardType.Number
+                    ),
                 onValueChange = { viewModel.updateOdometer(it) },
                 label = { Text("Odometer Reading") },
                 modifier = Modifier.fillMaxWidth()
             )
 
-            OutlinedTextField(
-                value = uiState.litres,
-                onValueChange = { viewModel.updateLitres(it) },
-                label = { Text("Litres") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            uiState.errorMessage?.let {
+
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
 
             OutlinedTextField(
                 value = uiState.amountPaid,
+                keyboardOptions =
+                    KeyboardOptions(
+                        keyboardType =
+                            KeyboardType.Decimal
+                    ),
                 onValueChange = {
                     viewModel.updateAmountPaid(it)
                 },
                 label = { Text("Amount Paid (₹)") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = uiState.fuelPrice,
+                onValueChange = {
+                    viewModel.updateFuelPrice(it)
+                },
+                keyboardOptions =
+                    KeyboardOptions(
+                        keyboardType =
+                            KeyboardType.Decimal
+                    ),
+                label = {
+                    Text("Fuel Price (₹/L)")
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = uiState.litres,
+                onValueChange = {},
+                label = {
+                    Text("Litres")
+                },
+                enabled = false,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -72,13 +118,20 @@ fun AddFuelScreen(
                     }
                 )
 
-                Text("Full Tank")
+                TextButton(
+                    onClick = {
+                        viewModel.updateFullTank(
+                            !uiState.fullTank
+                        )
+                    }
+                ) {
+                    Text("Full Tank")
+                }
             }
 
             Button(
                 onClick = {
                     viewModel.saveFuel(vehicleId)
-                    onBack()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

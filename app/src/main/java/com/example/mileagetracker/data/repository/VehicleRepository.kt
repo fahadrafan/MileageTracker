@@ -23,4 +23,24 @@ class VehicleRepository(
     ) {
         vehicleDao.deleteVehicle(vehicleId)
     }
+
+    suspend fun getVehicleById(
+        id: Long
+    ): Vehicle? {
+
+        return vehicleDao.getVehicleById(id)
+    }
+
+    suspend fun updateFuelDefaults(
+        vehicleId: Long,
+        amountPaid: Double,
+        fuelPrice: Double
+    ) {
+
+        vehicleDao.updateFuelDefaults(
+            vehicleId,
+            amountPaid,
+            fuelPrice
+        )
+    }
 }

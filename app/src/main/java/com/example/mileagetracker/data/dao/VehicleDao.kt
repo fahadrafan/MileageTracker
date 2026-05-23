@@ -24,4 +24,16 @@ interface VehicleDao {
 
     @Query("SELECT COUNT(*) FROM vehicles")
     suspend fun getVehicleCount(): Int
+
+    @Query("""
+    UPDATE vehicles
+    SET lastAmountPaid = :amountPaid,
+        lastFuelPrice = :fuelPrice
+    WHERE id = :vehicleId
+""")
+    suspend fun updateFuelDefaults(
+        vehicleId: Long,
+        amountPaid: Double,
+        fuelPrice: Double
+    )
 }

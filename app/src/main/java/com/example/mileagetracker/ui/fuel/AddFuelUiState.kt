@@ -6,5 +6,6 @@ data class AddFuelUiState(
     val amountPaid: String = "",
     val fuelPrice: String = "",
     val litres: String = "",
-    val fullTank: Boolean = true
+    val fullTank: Boolean = false,
+    val errorMessage: String? = null
 )
