@@ -6,6 +6,13 @@ import androidx.navigation.compose.*
 import com.example.mileagetracker.ui.dashboard.DashboardScreen
 import com.example.mileagetracker.ui.fuel.AddFuelScreen
 import com.example.mileagetracker.ui.history.HistoryScreen
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mileagetracker.FuelGarageApplication
+import com.example.mileagetracker.ui.dashboard.DashboardViewModel
+import com.example.mileagetracker.ui.dashboard.DashboardViewModelFactory
+import com.example.mileagetracker.ui.fuel.AddFuelViewModel
+import com.example.mileagetracker.ui.fuel.AddFuelViewModelFactory
 
 object Routes {
     const val DASHBOARD = "dashboard"
@@ -24,18 +31,56 @@ fun AppNavigation() {
     ) {
 
         composable(Routes.DASHBOARD) {
+            val context =
+                LocalContext.current
+
+            val app =
+                context.applicationContext
+                        as FuelGarageApplication
+
+            val viewModel =
+                viewModel<DashboardViewModel>(
+                    factory =
+                        DashboardViewModelFactory(
+                            app.container.vehicleRepository
+                        )
+                )
+
             DashboardScreen(
+                viewModel = viewModel,
                 onAddFuelClick = {
-                    navController.navigate(Routes.ADD_FUEL)
+                    navController.navigate(
+                        Routes.ADD_FUEL
+                    )
                 },
                 onHistoryClick = {
-                    navController.navigate(Routes.HISTORY)
+                    navController.navigate(
+                        Routes.HISTORY
+                    )
                 }
             )
         }
 
         composable(Routes.ADD_FUEL) {
+
+            val context =
+                LocalContext.current
+
+            val app =
+                context.applicationContext
+                        as FuelGarageApplication
+
+            val viewModel =
+                viewModel<AddFuelViewModel>(
+                    factory =
+                        AddFuelViewModelFactory(
+                            app.container.fuelRepository
+                        )
+                )
+
             AddFuelScreen(
+                viewModel = viewModel,
+                vehicleId = 1L,
                 onBack = {
                     navController.popBackStack()
                 }

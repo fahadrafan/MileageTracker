@@ -28,24 +28,43 @@ class DashboardViewModel(
             .getVehicles()
             .onEach { vehicles ->
 
+                val currentSelected =
+                    _uiState.value.selectedVehicle
+
                 _uiState.value =
                     DashboardUiState(
-                        vehicles = vehicles
+                        vehicles = vehicles,
+                        selectedVehicle =
+                            currentSelected
+                                ?: vehicles.firstOrNull()
                     )
             }
             .launchIn(viewModelScope)
     }
 
-    fun addSampleVehicle() {
+    fun addVehicle(
+        name: String,
+        type: VehicleType
+    ) {
 
         viewModelScope.launch {
 
             repository.addVehicle(
                 Vehicle(
-                    name = "Hyundai i20",
-                    type = VehicleType.CAR
+                    name = name,
+                    type = type
                 )
             )
         }
+    }
+
+    fun selectVehicle(
+        vehicle: Vehicle
+    ) {
+
+        _uiState.value =
+            _uiState.value.copy(
+                selectedVehicle = vehicle
+            )
     }
 }

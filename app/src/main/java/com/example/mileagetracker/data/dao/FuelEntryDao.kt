@@ -24,4 +24,14 @@ interface FuelEntryDao {
 
     @Query("DELETE FROM fuel_entries WHERE id = :id")
     suspend fun deleteEntry(id: Long)
+
+    @Query("""
+    SELECT * FROM fuel_entries
+    WHERE vehicleId = :vehicleId
+    ORDER BY odometerKm DESC
+    LIMIT 1
+""")
+    suspend fun getLatestEntry(
+        vehicleId: Long
+    ): FuelEntry?
 }

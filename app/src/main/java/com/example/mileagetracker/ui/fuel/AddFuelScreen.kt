@@ -5,16 +5,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.material3.Checkbox
+import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddFuelScreen(
+    viewModel: AddFuelViewModel,
+    vehicleId: Long,
     onBack: () -> Unit
 ) {
 
-    var odometer by remember { mutableStateOf("") }
-    var litres by remember { mutableStateOf("") }
-    var cost by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -35,28 +39,47 @@ fun AddFuelScreen(
         ) {
 
             OutlinedTextField(
-                value = odometer,
-                onValueChange = { odometer = it },
+                value = uiState.odometer,
+                onValueChange = { viewModel.updateOdometer(it) },
                 label = { Text("Odometer Reading") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
-                value = litres,
-                onValueChange = { litres = it },
+                value = uiState.litres,
+                onValueChange = { viewModel.updateLitres(it) },
                 label = { Text("Litres") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
-                value = cost,
-                onValueChange = { cost = it },
+                value = uiState.cost,
+                onValueChange = {
+                    viewModel.updateCost(it)
+                },
                 label = { Text("Cost") },
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Checkbox(
+                    checked = uiState.fullTank,
+                    onCheckedChange = {
+                        viewModel.updateFullTank(it)
+                    }
+                )
+
+                Text("Full Tank")
+            }
+
             Button(
-                onClick = onBack,
+                onClick = {
+                    viewModel.saveFuel(vehicleId)
+                    onBack()
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Save")
