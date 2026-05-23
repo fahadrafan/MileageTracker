@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.focus.onFocusChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,10 +24,12 @@ fun AddFuelScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     LaunchedEffect(vehicleId) {
-
-        viewModel.loadVehicleDefaults(
-            vehicleId
-        )
+        viewModel.loadVehicleDefaults(vehicleId)
+    }
+    LaunchedEffect(uiState.saveSuccessful) {
+        if (uiState.saveSuccessful) {
+            onBack()
+        }
     }
 
     Scaffold(
@@ -48,19 +51,34 @@ fun AddFuelScreen(
         ) {
 
             OutlinedTextField(
+                value = uiState.refillDateText,
+                onValueChange = { viewModel.updateDateText(it) },
+                label = { Text("Refill Date") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged {
+                        if (!it.isFocused) {
+                            viewModel.onDateFocusLost()
+                        }
+                    }
+            )
+
+            OutlinedTextField(
                 value = uiState.odometer,
-                keyboardOptions =
-                    KeyboardOptions(
-                        keyboardType =
-                            KeyboardType.Number
-                    ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 onValueChange = { viewModel.updateOdometer(it) },
                 label = { Text("Odometer Reading") },
                 modifier = Modifier.fillMaxWidth()
             )
 
-            uiState.errorMessage?.let {
+            if (uiState.lastOdometer.isNotBlank()) {
+                Text(
+                    text = "Last Reading: ${uiState.lastOdometer} km",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
 
+            uiState.errorMessage?.let {
                 Text(
                     text = it,
                     color = MaterialTheme.colorScheme.error
