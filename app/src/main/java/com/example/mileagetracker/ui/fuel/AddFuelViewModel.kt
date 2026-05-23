@@ -37,12 +37,21 @@ class AddFuelViewModel(
             )
     }
 
-    fun updateCost(
+    fun updateAmountPaid(
         value: String
     ) {
         _uiState.value =
             _uiState.value.copy(
-                cost = value
+                amountPaid = value
+            )
+    }
+
+    fun updateFuelPrice(
+        value: String
+    ) {
+        _uiState.value =
+            _uiState.value.copy(
+                fuelPrice = value
             )
     }
 
@@ -63,8 +72,8 @@ class AddFuelViewModel(
 
         if (
             state.odometer.isBlank()
-            || state.litres.isBlank()
-            || state.cost.isBlank()
+            || state.amountPaid.isBlank()
+            || state.fuelPrice.isBlank()
         ) {
             return
         }
@@ -78,10 +87,12 @@ class AddFuelViewModel(
                         System.currentTimeMillis(),
                     odometerKm =
                         state.odometer.toDouble(),
+                    amountPaid =
+                        state.amountPaid.toDouble(),
+                    fuelPrice =
+                        state.fuelPrice.toDouble(),
                     litres =
                         state.litres.toDouble(),
-                    cost =
-                        state.cost.toDouble(),
                     fullTank =
                         state.fullTank
                 )

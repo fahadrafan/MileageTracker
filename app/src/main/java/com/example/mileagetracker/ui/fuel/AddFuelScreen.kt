@@ -53,11 +53,11 @@ fun AddFuelScreen(
             )
 
             OutlinedTextField(
-                value = uiState.cost,
+                value = uiState.amountPaid,
                 onValueChange = {
-                    viewModel.updateCost(it)
+                    viewModel.updateAmountPaid(it)
                 },
-                label = { Text("Cost") },
+                label = { Text("Amount Paid (₹)") },
                 modifier = Modifier.fillMaxWidth()
             )
 
