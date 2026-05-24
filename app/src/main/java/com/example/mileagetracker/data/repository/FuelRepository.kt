@@ -8,25 +8,15 @@ class FuelRepository(
     private val fuelEntryDao: FuelEntryDao
 ) {
 
-    suspend fun addFuelEntry(
-        fuelEntry: FuelEntry
-    ) {
+    suspend fun addFuelEntry(fuelEntry: FuelEntry) {
         fuelEntryDao.insert(fuelEntry)
     }
 
-    fun getEntries(
-        vehicleId: Long
-    ): Flow<List<FuelEntry>> {
-
-        return fuelEntryDao
-            .getEntriesForVehicle(vehicleId)
+    fun getFuelEntriesForVehicle(vehicleId: Long): Flow<List<FuelEntry>> {
+        return fuelEntryDao.getEntriesForVehicle(vehicleId)
     }
 
-    suspend fun getLatestEntry(
-        vehicleId: Long
-    ): FuelEntry? {
-
-        return fuelEntryDao
-            .getLatestEntry(vehicleId)
+    suspend fun getLatestEntry(vehicleId: Long): FuelEntry? {
+        return fuelEntryDao.getLatestEntry(vehicleId)
     }
 }

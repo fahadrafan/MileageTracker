@@ -13,12 +13,21 @@ import com.example.mileagetracker.ui.dashboard.DashboardViewModel
 import com.example.mileagetracker.ui.dashboard.DashboardViewModelFactory
 import com.example.mileagetracker.ui.fuel.AddFuelViewModel
 import com.example.mileagetracker.ui.fuel.AddFuelViewModelFactory
+import com.example.mileagetracker.ui.history.HistoryViewModel
+import com.example.mileagetracker.ui.history.HistoryViewModelFactory
 
 object Routes {
     const val DASHBOARD = "dashboard"
-    const val ADD_FUEL = "add_fuel"
-    const val HISTORY = "history"
+    const val ADD_FUEL = "add_fuel/{vehicleId}"
+    const val HISTORY = "history/{vehicleId}"
+    fun addFuel(vehicleId: Long): String {
+        return "add_fuel/$vehicleId"
+    }
+    fun history(vehicleId: Long): String {
+        return "history/$vehicleId"
+    }
 }
+
 
 @Composable
 fun AppNavigation() {
@@ -31,45 +40,44 @@ fun AppNavigation() {
     ) {
 
         composable(Routes.DASHBOARD) {
-            val context =
-                LocalContext.current
+            val context = LocalContext.current
 
-            val app =
-                context.applicationContext
-                        as FuelGarageApplication
+            val app = context.applicationContext as FuelGarageApplication
 
             val viewModel =
-                viewModel<DashboardViewModel>(
-                    factory =
-                        DashboardViewModelFactory(
-                            app.container.vehicleRepository
-                        )
-                )
+                viewModel<DashboardViewModel>(factory = DashboardViewModelFactory(app.container.vehicleRepository))
 
             DashboardScreen(
                 viewModel = viewModel,
                 onAddFuelClick = {
-                    navController.navigate(
-                        Routes.ADD_FUEL
-                    )
+
+                    val vehicleId =
+                        viewModel.uiState.value.selectedVehicle?.id
+
+                    if (vehicleId != null) {
+                        navController.navigate(
+                            Routes.addFuel(vehicleId)
+                        )
+                    }
                 },
                 onHistoryClick = {
-                    navController.navigate(
-                        Routes.HISTORY
-                    )
+                    val vehicleId = viewModel.uiState.value.selectedVehicle?.id
+                    if (vehicleId != null) {
+                        navController.navigate(Routes.history(vehicleId))
+                    }
                 }
             )
         }
 
-        composable(Routes.ADD_FUEL) {
+        composable("add_fuel/{vehicleId}") { backStackEntry ->
+            val vehicleId =
+                backStackEntry.arguments
+                    ?.getString("vehicleId")
+                    ?.toLongOrNull()
+                    ?: return@composable
 
-            val context =
-                LocalContext.current
-
-            val app =
-                context.applicationContext
-                        as FuelGarageApplication
-
+            val context = LocalContext.current
+            val app = context.applicationContext as FuelGarageApplication
             val viewModel =
                 viewModel<AddFuelViewModel>(
                     factory =
@@ -78,18 +86,35 @@ fun AppNavigation() {
                             app.container.vehicleRepository
                         )
                 )
-
             AddFuelScreen(
                 viewModel = viewModel,
-                vehicleId = 1L,
+                vehicleId = vehicleId,
                 onBack = {
                     navController.popBackStack()
                 }
             )
         }
 
-        composable(Routes.HISTORY) {
+        composable(route = Routes.HISTORY) { backStackEntry ->
+
+            val vehicleId =
+                backStackEntry.arguments
+                    ?.getString("vehicleId")
+                    ?.toLongOrNull()
+                    ?: return@composable
+
+            val context = LocalContext.current
+            val app = context.applicationContext as FuelGarageApplication
+            val historyViewModel =
+                viewModel<HistoryViewModel>(
+                    factory =
+                        HistoryViewModelFactory(
+                            app.container.fuelRepository,
+                            vehicleId
+                        )
+                )
             HistoryScreen(
+                viewModel = historyViewModel,
                 onBack = {
                     navController.popBackStack()
                 }
