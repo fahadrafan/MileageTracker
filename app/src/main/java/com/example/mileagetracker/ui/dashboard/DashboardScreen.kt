@@ -17,6 +17,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import com.example.mileagetracker.data.entity.VehicleType
 
 @Composable
@@ -265,20 +268,24 @@ fun DashboardScreen(
                             text = "%.1f km/l".format(stats.estimatedMileage),
                             style = MaterialTheme.typography.displaySmall
                         )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Last Refuel Date: ${formatDate(stats.lastRefuelDate)}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     }
                 }
             }
 
             item {
-
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-
                     StatCard(
                         title = "Average Mileage",
                         value = "%.1f km/l".format(stats.averageVerifiedMileage),
                         modifier = Modifier.weight(1f)
                     )
-
                     StatCard(
                         title = "Cost/km",
                         value = "₹%.2f".format(stats.costPerKm),
@@ -318,11 +325,46 @@ fun DashboardScreen(
             }
 
             item {
-                Button(
-                    onClick = onHistoryClick,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("View History")
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Recent Fills",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                            TextButton(onClick = onHistoryClick) {
+                                Text("View All")
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
+                        if (uiState.recentEntries.isEmpty()) {
+                            Text("No fuel entries yet")
+                        } else {
+                            uiState.recentEntries.forEach { entry ->
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        text = formatDate(entry.dateMillis),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Text(
+                                        text = "₹%.0f".format(entry.amountPaid),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Text(
+                                        text = "%.1f L".format(entry.litres)
+                                    )
+                                }
+                                if (entry != uiState.recentEntries.last()) {
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -353,4 +395,13 @@ private fun StatCard(
             )
         }
     }
+}
+
+private fun formatDate(dateMillis: Long): String {
+    if (dateMillis == 0L) return "-"
+
+    return SimpleDateFormat(
+        "dd-MMM-yy",
+        Locale.getDefault()
+    ).format(Date(dateMillis))
 }

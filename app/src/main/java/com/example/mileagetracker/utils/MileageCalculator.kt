@@ -127,6 +127,7 @@ object MileageCalculator {
         }
 
         val sortedEntries = entries.sortedBy { it.odometerKm }
+        val latestEntry = entries.maxByOrNull { it.dateMillis }
         val totalSpent = entries.sumOf { it.amountPaid }
         val fuelConsumed = entries.sumOf { it.litres }
         val totalDistance =
@@ -178,7 +179,13 @@ object MileageCalculator {
             totalDistance = totalDistance,
             fuelConsumed = fuelConsumed,
             totalSpent = totalSpent,
-            costPerKm = costPerKm
+            costPerKm = costPerKm,
+
+            fuelEntryCount = entries.size,
+            lastRefuelDate = latestEntry?.dateMillis ?: 0L,
+            lastRefuelCost = latestEntry?.amountPaid ?: 0.0,
+            lastRefuelLitres = latestEntry?.litres ?: 0.0,
+            lastRefuelFullTank = latestEntry?.fullTank ?: false
         )
     }
 }

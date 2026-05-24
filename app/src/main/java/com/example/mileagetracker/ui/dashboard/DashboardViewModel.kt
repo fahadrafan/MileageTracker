@@ -68,21 +68,12 @@ class DashboardViewModel(
                 .getFuelEntriesForVehicle(vehicleId)
                 .collectLatest { entries ->
                     val stats = MileageCalculator.calculateStatistics(entries)
-                    android.util.Log.d(
-                        "FuelGarageStats",
-                        """
-    VehicleId=$vehicleId
-    Entries=${entries.size}
-    Estimated=${stats.estimatedMileage}
-    LastVerified=${stats.lastVerifiedMileage}
-    AverageVerified=${stats.averageVerifiedMileage}
-    Distance=${stats.totalDistance}
-    Fuel=${stats.fuelConsumed}
-    Spent=${stats.totalSpent}
-    CostPerKm=${stats.costPerKm}
-    """.trimIndent()
+                    _uiState.value = _uiState.value.copy(
+                        statistics = stats,
+                        recentEntries = entries
+                            .sortedByDescending { it.dateMillis }
+                            .take(3)
                     )
-                    _uiState.value = _uiState.value.copy(statistics = stats)
                 }
         }
     }
