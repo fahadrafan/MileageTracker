@@ -41,18 +41,33 @@ class DashboardViewModel(
 
     fun addVehicle(name: String, type: VehicleType) {
         viewModelScope.launch {
-            vehicleRepository.addVehicle(
-                Vehicle(
-                    name = name,
-                    type = type
-                )
+            val vehicle = Vehicle(
+                name = name,
+                type = type
             )
+            val vehicleId = vehicleRepository.addVehicle(vehicle)
+            selectVehicle(vehicle.copy(id = vehicleId))
         }
     }
 
     fun deleteVehicle(vehicleId: Long) {
         viewModelScope.launch {
             vehicleRepository.deleteVehicle(vehicleId)
+        }
+    }
+
+    fun updateVehicle(
+        vehicleId: Long,
+        name: String,
+        type: VehicleType
+    ) {
+        viewModelScope.launch {
+            val vehicle = Vehicle(
+                id = vehicleId,
+                name = name,
+                type = type
+            )
+            vehicleRepository.updateVehicle(vehicle)
         }
     }
 

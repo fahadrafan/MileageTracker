@@ -14,8 +14,8 @@ class VehicleRepository(
 
     suspend fun addVehicle(
         vehicle: Vehicle
-    ) {
-        vehicleDao.insert(vehicle)
+    ): Long {
+        return vehicleDao.insert(vehicle)
     }
 
     suspend fun deleteVehicle(
@@ -24,10 +24,7 @@ class VehicleRepository(
         vehicleDao.deleteVehicle(vehicleId)
     }
 
-    suspend fun getVehicleById(
-        id: Long
-    ): Vehicle? {
-
+    suspend fun getVehicleById(id: Long): Vehicle? {
         return vehicleDao.getVehicleById(id)
     }
 
@@ -42,5 +39,9 @@ class VehicleRepository(
             amountPaid,
             fuelPrice
         )
+    }
+
+    suspend fun updateVehicle(vehicle: Vehicle) {
+        vehicleDao.updateVehicle(vehicle)
     }
 }

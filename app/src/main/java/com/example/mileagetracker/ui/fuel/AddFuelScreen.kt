@@ -13,6 +13,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.SelectableDates
+import java.time.Instant
+import java.time.ZoneId
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,6 +35,8 @@ fun AddFuelScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
+    var showDatePicker by remember { mutableStateOf(false) }
+
     LaunchedEffect(vehicleId) {
         if (!isEditMode) {
             viewModel.loadVehicleDefaults(vehicleId)
@@ -32,6 +45,45 @@ fun AddFuelScreen(
     LaunchedEffect(uiState.saveSuccessful) {
         if (uiState.saveSuccessful) {
             onBack()
+        }
+    }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    val selectedDate =
+                        Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                    return !selectedDate.isAfter(LocalDate.now())
+                }
+            }
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let {
+                            viewModel.setDateMillis(it)
+                        }
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 
@@ -60,6 +112,18 @@ fun AddFuelScreen(
                 value = uiState.refillDateText,
                 onValueChange = { viewModel.updateDateText(it) },
                 label = { Text("Refill Date") },
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            showDatePicker = true
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "Select Date"
+                        )
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .onFocusChanged {

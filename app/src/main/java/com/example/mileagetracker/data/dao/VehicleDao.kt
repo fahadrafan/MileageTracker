@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.mileagetracker.data.entity.Vehicle
 import kotlinx.coroutines.flow.Flow
 
@@ -36,4 +37,7 @@ interface VehicleDao {
         amountPaid: Double,
         fuelPrice: Double
     )
+
+    @Update
+    suspend fun updateVehicle(vehicle: Vehicle)
 }

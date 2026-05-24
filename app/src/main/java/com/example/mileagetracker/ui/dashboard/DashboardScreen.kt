@@ -44,6 +44,14 @@ fun DashboardScreen(
         mutableStateOf(false)
     }
 
+    var isEditVehicle by remember {
+        mutableStateOf(false)
+    }
+
+    var editingVehicleId by remember {
+        mutableStateOf<Long?>(null)
+    }
+
     var vehicleName by remember {
         mutableStateOf("")
     }
@@ -81,7 +89,12 @@ fun DashboardScreen(
 
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Add Vehicle") },
+            title = {
+                Text(
+                    if (isEditVehicle) "Edit Vehicle"
+                    else "Add Vehicle"
+                )
+            },
             text = {
                 Column {
                     OutlinedTextField(
@@ -113,11 +126,24 @@ fun DashboardScreen(
                 TextButton(
                     onClick = {
                         if (vehicleName.isNotBlank()) {
-                            viewModel.addVehicle(
-                                vehicleName,
-                                selectedType
-                            )
+                            if (isEditVehicle) {
+                                editingVehicleId?.let { id ->
+                                    viewModel.updateVehicle(
+                                        vehicleId = id,
+                                        name = vehicleName,
+                                        type = selectedType
+                                    )
+                                }
+                            } else {
+                                viewModel.addVehicle(
+                                    vehicleName,
+                                    selectedType
+                                )
+                            }
                             vehicleName = ""
+                            selectedType = VehicleType.CAR
+                            editingVehicleId = null
+                            isEditVehicle = false
                             showDialog = false
                         }
                     }
@@ -129,6 +155,8 @@ fun DashboardScreen(
             dismissButton = {
                 TextButton(
                     onClick = {
+                        editingVehicleId = null
+                        isEditVehicle = false
                         showDialog = false
                     }
                 ) {
@@ -248,12 +276,27 @@ fun DashboardScreen(
                                 modifier = Modifier.weight(1f)
                             )
 
-                            TextButton(
-                                onClick = {
-                                    showDeleteDialog = true
+                            Row {
+                                TextButton(
+                                    onClick = {
+                                        uiState.selectedVehicle?.let { vehicle ->
+                                            editingVehicleId = vehicle.id
+                                            vehicleName = vehicle.name
+                                            selectedType = vehicle.type
+                                            isEditVehicle = true
+                                            showDialog = true
+                                        }
+                                    }
+                                ) {
+                                    Text("Edit")
                                 }
-                            ) {
-                                Text("Delete")
+                                TextButton(
+                                    onClick = {
+                                        showDeleteDialog = true
+                                    }
+                                ) {
+                                    Text("Delete")
+                                }
                             }
                         }
 

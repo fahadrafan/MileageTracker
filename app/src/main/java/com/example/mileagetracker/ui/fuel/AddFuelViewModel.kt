@@ -56,7 +56,21 @@ class AddFuelViewModel(
     }
 
     fun updateDateText(value: String) {
-        _uiState.value = _uiState.value.copy(refillDateText = value)
+        _uiState.value = _uiState.value.copy(
+            refillDateText = value,
+            errorMessage = null
+        )
+    }
+
+    fun setDateMillis(dateMillis: Long) {
+        val formatter = SimpleDateFormat("dd-MMM-yy", Locale.getDefault())
+
+        _uiState.value = _uiState.value.copy(
+            refillDateText = formatter.format(
+                Date(dateMillis)
+            ),
+            errorMessage = null
+        )
     }
 
     fun onDateFocusLost() {
@@ -65,21 +79,47 @@ class AddFuelViewModel(
 
     private fun formatDateIfNeeded() {
         val text = _uiState.value.refillDateText
-        if (text.length != 8 || !text.all { it.isDigit() }) {
+        if (!text.all { it.isDigit() }) {
             return
         }
-
-        try {
-            val inputFormat = SimpleDateFormat("ddMMyyyy", Locale.getDefault())
-            inputFormat.isLenient = false
-            val outputFormat = SimpleDateFormat("dd-MMM-yy", Locale.getDefault())
-            val date = inputFormat.parse(text) ?: return
-
-            if (date.after(Date())) {
-                _uiState.value = _uiState.value.copy(errorMessage = "Future dates are not allowed")
-                return
+        val inputPattern =
+            when (text.length) {
+                6 -> "ddMMyy"
+                8 -> "ddMMyyyy"
+                else -> return
             }
 
+        try {
+            val inputFormat = SimpleDateFormat(inputPattern, Locale.getDefault())
+                .apply {
+                    isLenient = false
+                }
+            val outputFormat = SimpleDateFormat("dd-MMM-yy", Locale.getDefault())
+            val date = inputFormat.parse(text) ?: return
+            if (date.after(Date())) {
+
+                _uiState.value =
+                    _uiState.value.copy(
+                        refillDateText =
+                            outputFormat.format(date),
+                        errorMessage =
+                            "Future dates are not allowed"
+                    )
+
+                return
+            }
+            if (date.after(Date())) {
+
+                _uiState.value =
+                    _uiState.value.copy(
+                        refillDateText =
+                            outputFormat.format(date),
+                        errorMessage =
+                            "Future dates are not allowed"
+                    )
+
+                return
+            }
             _uiState.value =
                 _uiState.value.copy(refillDateText = outputFormat.format(date), errorMessage = null)
 
