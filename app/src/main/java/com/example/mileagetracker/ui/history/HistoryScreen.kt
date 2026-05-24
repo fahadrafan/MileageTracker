@@ -21,7 +21,8 @@ import java.util.*
 @Composable
 fun HistoryScreen(
     viewModel: HistoryViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onEditEntry: (FuelEntry) -> Unit
 ) {
 
     val entries by viewModel.entries.collectAsState()
@@ -99,7 +100,12 @@ fun HistoryScreen(
                 items(entries) { entry ->
                     FuelEntryCard(
                         entry = entry,
-                        onDeleteClick = { entryToDelete = entry }
+                        onEditClick = {
+                            onEditEntry(entry)
+                        },
+                        onDeleteClick = {
+                            entryToDelete = entry
+                        }
                     )
                 }
             }
@@ -110,6 +116,7 @@ fun HistoryScreen(
 @Composable
 private fun FuelEntryCard(
     entry: FuelEntry,
+    onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     Card(modifier = Modifier
@@ -125,18 +132,25 @@ private fun FuelEntryCard(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                TextButton(
-                    onClick = onDeleteClick
-                ) {
-                    Text("Delete")
+                Row {
+                    TextButton(
+                        onClick = onEditClick
+                    ) {
+                        Text("Edit")
+                    }
+                    TextButton(
+                        onClick = onDeleteClick
+                    ) {
+                        Text("Delete")
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+            Text("Odometer Reading: ${entry.odometerKm} km")
             Text("Amount Paid: ₹${entry.amountPaid}")
             Text("Fuel Price: ₹%.2f/L".format(entry.fuelPrice))
             Text("Litres: %.2f L".format(entry.litres))
-            Text("Odometer: ${entry.odometerKm} km")
 
             if (entry.fullTank) {
                 Spacer(modifier = Modifier.height(6.dp))

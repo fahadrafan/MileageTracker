@@ -73,7 +73,7 @@ object MileageCalculator {
             return emptyList()
         }
 
-        val sortedEntries = entries.sortedBy { it.dateMillis }
+        val sortedEntries = entries.sortedBy { it.odometerKm }
         val results = mutableListOf<VerifiedMileageResult>()
         var startFullTank: FuelEntry? = null
         val intermediateEntries = mutableListOf<FuelEntry>()
@@ -120,22 +120,24 @@ object MileageCalculator {
         return records.map { it.mileageKmPerLitre }.average()
     }
 
-    fun calculateStatistics(
-        entries: List<FuelEntry>
-    ): VehicleStatistics {
+    fun calculateStatistics(entries: List<FuelEntry>): VehicleStatistics {
 
         if (entries.isEmpty()) {
             return VehicleStatistics()
         }
 
-        val sortedEntries = entries.sortedBy { it.dateMillis }
+        val sortedEntries = entries.sortedBy { it.odometerKm }
         val totalSpent = entries.sumOf { it.amountPaid }
         val fuelConsumed = entries.sumOf { it.litres }
         val totalDistance =
-            if (sortedEntries.size >= 2)
-                sortedEntries.last().odometerKm - sortedEntries.first().odometerKm
-            else
+            if (sortedEntries.size >= 2) {
+                maxOf(
+                    0.0,
+                    sortedEntries.last().odometerKm - sortedEntries.first().odometerKm
+                )
+            } else {
                 0.0
+            }
 
         val estimatedMileage =
             if (sortedEntries.size >= 2) {

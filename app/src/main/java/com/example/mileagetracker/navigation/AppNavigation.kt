@@ -20,12 +20,17 @@ object Routes {
     const val DASHBOARD = "dashboard"
     const val ADD_FUEL = "add_fuel/{vehicleId}"
     const val HISTORY = "history/{vehicleId}"
+    const val EDIT_FUEL = "edit_fuel/{vehicleId}/{entryId}"
     fun addFuel(vehicleId: Long): String {
         return "add_fuel/$vehicleId"
     }
 
     fun history(vehicleId: Long): String {
         return "history/$vehicleId"
+    }
+
+    fun editFuel(vehicleId: Long, entryId: Long): String {
+        return "edit_fuel/$vehicleId/$entryId"
     }
 }
 
@@ -94,6 +99,46 @@ fun AppNavigation() {
             AddFuelScreen(
                 viewModel = viewModel,
                 vehicleId = vehicleId,
+                isEditMode = false,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(route = Routes.EDIT_FUEL) { backStackEntry ->
+            val vehicleId =
+                backStackEntry.arguments
+                    ?.getString("vehicleId")
+                    ?.toLongOrNull()
+                    ?: return@composable
+
+            val entryId =
+                backStackEntry.arguments
+                    ?.getString("entryId")
+                    ?.toLongOrNull()
+                    ?: return@composable
+
+            val context = LocalContext.current
+            val app = context.applicationContext as FuelGarageApplication
+
+            val viewModel =
+                viewModel<AddFuelViewModel>(
+                    factory =
+                        AddFuelViewModelFactory(
+                            app.container.fuelRepository,
+                            app.container.vehicleRepository
+                        )
+                )
+
+            LaunchedEffect(entryId) {
+                viewModel.loadEntryForEdit(entryId)
+            }
+
+            AddFuelScreen(
+                viewModel = viewModel,
+                vehicleId = vehicleId,
+                isEditMode = true,
                 onBack = {
                     navController.popBackStack()
                 }
@@ -122,6 +167,14 @@ fun AppNavigation() {
                 viewModel = historyViewModel,
                 onBack = {
                     navController.popBackStack()
+                },
+                onEditEntry = { entry ->
+                    navController.navigate(
+                        Routes.editFuel(
+                            vehicleId = vehicleId,
+                            entryId = entry.id
+                        )
+                    )
                 }
             )
         }

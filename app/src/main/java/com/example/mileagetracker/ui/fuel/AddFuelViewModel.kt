@@ -20,6 +20,8 @@ class AddFuelViewModel(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddFuelUiState())
+    private var editingEntryId: Long? = null
+    private var isEditMode = false
 
     val uiState: StateFlow<AddFuelUiState> = _uiState.asStateFlow()
 
@@ -147,12 +149,10 @@ class AddFuelViewModel(
         }
 
         viewModelScope.launch {
-
             val lastEntry = fuelRepository.getLatestEntry(vehicleId)
-
             val currentOdometer = state.odometer.toDouble()
-
             if (
+                editingEntryId == null &&
                 lastEntry != null &&
                 currentOdometer <= lastEntry.odometerKm
             ) {
@@ -162,17 +162,21 @@ class AddFuelViewModel(
             }
             _uiState.value = state.copy(errorMessage = null)
 
-            fuelRepository.addFuelEntry(
-                FuelEntry(
-                    vehicleId = vehicleId,
-                    dateMillis = parseDateMillis(state.refillDateText),
-                    odometerKm = state.odometer.toDouble(),
-                    amountPaid = state.amountPaid.toDouble(),
-                    fuelPrice = state.fuelPrice.toDouble(),
-                    litres = state.litres.toDouble(),
-                    fullTank = state.fullTank
-                )
+            val fuelEntry = FuelEntry(
+                id = editingEntryId ?: 0,
+                vehicleId = vehicleId,
+                dateMillis = parseDateMillis(state.refillDateText),
+                odometerKm = state.odometer.toDouble(),
+                amountPaid = state.amountPaid.toDouble(),
+                fuelPrice = state.fuelPrice.toDouble(),
+                litres = state.litres.toDouble(),
+                fullTank = state.fullTank
             )
+            if (editingEntryId == null) {
+                fuelRepository.addFuelEntry(fuelEntry)
+            } else {
+                fuelRepository.updateEntry(fuelEntry)
+            }
 
             vehicleRepository.updateFuelDefaults(
                 vehicleId,
@@ -185,60 +189,76 @@ class AddFuelViewModel(
 
     fun loadVehicleDefaults(vehicleId: Long) {
 
+        if (isEditMode) return
         viewModelScope.launch {
-
             val vehicle = vehicleRepository.getVehicleById(vehicleId)
-
             val lastEntry = fuelRepository.getLatestEntry(vehicleId)
             vehicle?.let {
 
-                _uiState.value =
-                    _uiState.value.copy(
-                        amountPaid =
-                            if (it.lastAmountPaid > 0)
-                                it.lastAmountPaid.toInt().toString()
-                            else "",
+                val hasHistory = lastEntry != null
+                _uiState.value = _uiState.value.copy(
+                    amountPaid =
+                        if (hasHistory && it.lastAmountPaid > 0)
+                            it.lastAmountPaid.toInt().toString()
+                        else "",
 
-                        fuelPrice =
-                            if (
-                                it.lastFuelPrice > 0
-                            )
-                                it.lastFuelPrice.toString()
-                            else "",
+                    fuelPrice =
+                        if (hasHistory && it.lastFuelPrice > 0)
+                            it.lastFuelPrice.toString()
+                        else "",
 
-                        lastOdometer =
-                            lastEntry?.odometerKm
-                                ?.toInt()
-                                ?.toString()
-                                ?: "",
-                    )
-
+                    lastOdometer =
+                        lastEntry?.odometerKm
+                            ?.toInt()
+                            ?.toString()
+                            ?: "",
+                )
                 calculateLitres()
             }
         }
     }
 
     @SuppressLint("DefaultLocale")
+    fun loadEntryForEdit(entryId: Long) {
+        viewModelScope.launch {
+
+            val entry = fuelRepository.getEntryById(entryId) ?: return@launch
+            isEditMode = true
+            editingEntryId = entry.id
+            _uiState.value =
+                _uiState.value.copy(
+                    refillDateText = SimpleDateFormat(
+                        "dd-MMM-yy", Locale.getDefault()
+                    )
+                        .format(
+                            Date(entry.dateMillis)
+                        ),
+                    odometer = entry.odometerKm.toInt().toString(),
+                    amountPaid = entry.amountPaid.toString(),
+                    fuelPrice = entry.fuelPrice.toString(),
+                    litres = String.format("%.2f", entry.litres),
+                    fullTank = entry.fullTank
+                )
+        }
+    }
+
+    @SuppressLint("DefaultLocale")
     private fun calculateLitres() {
-
         val amount = _uiState.value.amountPaid.toDoubleOrNull()
-
         val price = _uiState.value.fuelPrice.toDoubleOrNull()
-
         if (
             amount == null
             || price == null
             || price <= 0
         ) {
-            _uiState.value =
-                _uiState.value.copy(
-                    litres = ""
-                )
+            _uiState.value = _uiState.value.copy(litres = "")
             return
         }
-
         val litres = amount / price
-
         _uiState.value = _uiState.value.copy(litres = String.format("%.2f", litres))
+    }
+
+    fun isEditing(): Boolean {
+        return editingEntryId != null
     }
 }

@@ -19,12 +19,15 @@ import androidx.compose.ui.focus.onFocusChanged
 fun AddFuelScreen(
     viewModel: AddFuelViewModel,
     vehicleId: Long,
+    isEditMode: Boolean = false,
     onBack: () -> Unit
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
     LaunchedEffect(vehicleId) {
-        viewModel.loadVehicleDefaults(vehicleId)
+        if (!isEditMode) {
+            viewModel.loadVehicleDefaults(vehicleId)
+        }
     }
     LaunchedEffect(uiState.saveSuccessful) {
         if (uiState.saveSuccessful) {
@@ -36,7 +39,10 @@ fun AddFuelScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Add Fuel")
+                    Text(
+                        if (!isEditMode) "Add Fuel"
+                        else "Edit Fuel Entry"
+                    )
                 }
             )
         }
@@ -147,13 +153,33 @@ fun AddFuelScreen(
                 }
             }
 
-            Button(
-                onClick = {
-                    viewModel.saveFuel(vehicleId)
-                },
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Save")
+                OutlinedButton(
+                    onClick = {
+                        onBack()
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        if (isEditMode) "Discard"
+                        else "Cancel"
+                    )
+                }
+                Button(
+                    onClick = {
+                        viewModel.saveFuel(vehicleId)
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+
+                    Text(
+                        if (isEditMode) "Update"
+                        else "Save"
+                    )
+                }
             }
         }
     }

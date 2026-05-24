@@ -12,6 +12,14 @@ class FuelRepository(
         fuelEntryDao.insert(fuelEntry)
     }
 
+    suspend fun updateEntry(entry: FuelEntry) {
+        fuelEntryDao.updateEntry(entry)
+    }
+
+    suspend fun getEntryById(entryId: Long): FuelEntry? {
+        return fuelEntryDao.getEntryById(entryId)
+    }
+
     fun getFuelEntriesForVehicle(vehicleId: Long): Flow<List<FuelEntry>> {
         return fuelEntryDao.getEntriesForVehicle(vehicleId)
     }

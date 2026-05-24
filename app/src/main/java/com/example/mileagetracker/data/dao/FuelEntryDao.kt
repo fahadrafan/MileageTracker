@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.mileagetracker.data.entity.FuelEntry
 import kotlinx.coroutines.flow.Flow
 
@@ -13,6 +14,19 @@ interface FuelEntryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entry: FuelEntry)
 
+    @Update
+    suspend fun updateEntry(
+        entry: FuelEntry
+    )
+
+    @Query("""
+    SELECT * FROM fuel_entries
+    WHERE id = :entryId
+    LIMIT 1
+""")
+    suspend fun getEntryById(
+        entryId: Long
+    ): FuelEntry?
     @Query("""
     SELECT * FROM fuel_entries
     WHERE vehicleId = :vehicleId
