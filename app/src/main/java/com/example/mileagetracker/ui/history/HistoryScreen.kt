@@ -13,6 +13,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
 import com.example.mileagetracker.data.entity.FuelEntry
 import java.text.SimpleDateFormat
 import java.util.*
@@ -24,7 +29,6 @@ fun HistoryScreen(
     onBack: () -> Unit,
     onEditEntry: (FuelEntry) -> Unit
 ) {
-
     val entries by viewModel.entries.collectAsState()
     var entryToDelete by remember { mutableStateOf<FuelEntry?>(null) }
     if (entryToDelete != null) {
@@ -119,9 +123,14 @@ private fun FuelEntryCard(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 12.dp)) {
+    var menuExpanded by remember {
+        mutableStateOf(false)
+    }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp)
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -132,16 +141,53 @@ private fun FuelEntryCard(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                Row {
-                    TextButton(
-                        onClick = onEditClick
+                Box {
+
+                    IconButton(
+                        onClick = {
+                            menuExpanded = true
+                        }
                     ) {
-                        Text("Edit")
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options"
+                        )
                     }
-                    TextButton(
-                        onClick = onDeleteClick
+
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = {
+                            menuExpanded = false
+                        }
                     ) {
-                        Text("Delete")
+
+                        DropdownMenuItem(
+                            text = { Text("Edit") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                menuExpanded = false
+                                onEditClick()
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("Delete") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = {
+                                menuExpanded = false
+                                onDeleteClick()
+                            }
+                        )
                     }
                 }
             }
