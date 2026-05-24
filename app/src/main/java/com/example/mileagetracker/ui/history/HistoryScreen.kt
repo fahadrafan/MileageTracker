@@ -25,6 +25,41 @@ fun HistoryScreen(
 ) {
 
     val entries by viewModel.entries.collectAsState()
+    var entryToDelete by remember { mutableStateOf<FuelEntry?>(null) }
+    if (entryToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { entryToDelete = null },
+            title = { Text("Delete Fuel Entry?") },
+            text = {
+                Column {
+                    Text(formatDate(entryToDelete!!.dateMillis))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Odometer: ${entryToDelete!!.odometerKm} km")
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("This action cannot be undone.")
+                }
+            },
+
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteEntry(entryToDelete!!.id)
+                        entryToDelete = null
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+
+            dismissButton = {
+                TextButton(
+                    onClick = { entryToDelete = null }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -45,9 +80,7 @@ fun HistoryScreen(
             )
         }
     ) { padding ->
-
         if (entries.isEmpty()) {
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -56,17 +89,19 @@ fun HistoryScreen(
             ) {
                 Text("No fuel entries found")
             }
-
         } else {
-
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-
-                items(entries) { entry -> FuelEntryCard(entry) }
+                items(entries) { entry ->
+                    FuelEntryCard(
+                        entry = entry,
+                        onDeleteClick = { entryToDelete = entry }
+                    )
+                }
             }
         }
     }
@@ -74,21 +109,28 @@ fun HistoryScreen(
 
 @Composable
 private fun FuelEntryCard(
-    entry: FuelEntry
+    entry: FuelEntry,
+    onDeleteClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-
-            Text(
-                text = formatDate(entry.dateMillis),
-                style = MaterialTheme.typography.titleMedium
-            )
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 12.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = formatDate(entry.dateMillis),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                TextButton(
+                    onClick = onDeleteClick
+                ) {
+                    Text("Delete")
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
             Text("Amount Paid: ₹${entry.amountPaid}")

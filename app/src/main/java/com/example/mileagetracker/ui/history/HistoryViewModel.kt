@@ -8,9 +8,10 @@ import com.example.mileagetracker.data.repository.FuelRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class HistoryViewModel(
-    repository: FuelRepository,
+    private val repository: FuelRepository,
     vehicleId: Long
 ) : ViewModel() {
 
@@ -22,6 +23,12 @@ class HistoryViewModel(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
             )
+
+    fun deleteEntry(entryId: Long) {
+        viewModelScope.launch {
+            repository.deleteEntry(entryId)
+        }
+    }
 }
 
 class HistoryViewModelFactory(

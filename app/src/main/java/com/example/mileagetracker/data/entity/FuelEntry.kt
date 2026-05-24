@@ -1,9 +1,22 @@
 package com.example.mileagetracker.data.entity
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "fuel_entries")
+@Entity(
+    tableName = "fuel_entries",
+    foreignKeys = [
+        ForeignKey(
+            entity = Vehicle::class,
+            parentColumns = ["id"],
+            childColumns = ["vehicleId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("vehicleId")]
+)
 data class FuelEntry(
 
     @PrimaryKey(autoGenerate = true)

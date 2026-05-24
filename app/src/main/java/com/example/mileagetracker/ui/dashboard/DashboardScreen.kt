@@ -33,6 +33,10 @@ fun DashboardScreen(
         mutableStateOf(false)
     }
 
+    var showDeleteDialog by remember {
+        mutableStateOf(false)
+    }
+
     var showVehicleSelector by remember {
         mutableStateOf(false)
     }
@@ -46,48 +50,26 @@ fun DashboardScreen(
     }
 
     if (showVehicleSelector) {
-
         AlertDialog(
-            onDismissRequest = {
-                showVehicleSelector = false
-            },
-
-            title = {
-                Text("Select Vehicle")
-            },
-
+            onDismissRequest = { showVehicleSelector = false },
+            title = { Text("Select Vehicle") },
             text = {
-
                 Column {
-
                     uiState.vehicles.forEach { vehicle ->
-
                         TextButton(
                             onClick = {
-
-                                viewModel.selectVehicle(
-                                    vehicle
-                                )
-
-                                showVehicleSelector =
-                                    false
+                                viewModel.selectVehicle(vehicle)
+                                showVehicleSelector = false
                             }
                         ) {
-
                             val icon =
-                                if (
-                                    vehicle.type.name == "CAR"
-                                ) "🚗"
+                                if (vehicle.type.name == "CAR") "🚗"
                                 else "🏍"
-
-                            Text(
-                                "$icon ${vehicle.name}"
-                            )
+                            Text("$icon ${vehicle.name}")
                         }
                     }
                 }
             },
-
             confirmButton = {}
         )
     }
@@ -95,84 +77,44 @@ fun DashboardScreen(
     if (showDialog) {
 
         AlertDialog(
-            onDismissRequest = {
-                showDialog = false
-            },
-
-            title = {
-                Text("Add Vehicle")
-            },
-
+            onDismissRequest = { showDialog = false },
+            title = { Text("Add Vehicle") },
             text = {
-
                 Column {
-
                     OutlinedTextField(
                         value = vehicleName,
-                        onValueChange = {
-                            vehicleName = it
-                        },
-                        label = {
-                            Text("Vehicle Name")
-                        }
+                        onValueChange = { vehicleName = it },
+                        label = { Text("Vehicle Name") }
                     )
 
-                    Spacer(
-                        modifier = Modifier.height(16.dp)
-                    )
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    Row(
-                        verticalAlignment =
-                            Alignment.CenterVertically
-                    ) {
-
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
-                            selected =
-                                selectedType ==
-                                        VehicleType.CAR,
-                            onClick = {
-                                selectedType =
-                                    VehicleType.CAR
-                            }
+                            selected = selectedType == VehicleType.CAR,
+                            onClick = { selectedType = VehicleType.CAR }
                         )
-
                         Text("Car")
                     }
-
-                    Row(
-                        verticalAlignment =
-                            Alignment.CenterVertically
-                    ) {
-
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
-                            selected =
-                                selectedType ==
-                                        VehicleType.BIKE,
-                            onClick = {
-                                selectedType =
-                                    VehicleType.BIKE
-                            }
+                            selected = selectedType == VehicleType.BIKE,
+                            onClick = { selectedType = VehicleType.BIKE }
                         )
-
                         Text("Bike")
                     }
                 }
             },
 
             confirmButton = {
-
                 TextButton(
                     onClick = {
-
                         if (vehicleName.isNotBlank()) {
-
                             viewModel.addVehicle(
                                 vehicleName,
                                 selectedType
                             )
-
                             vehicleName = ""
-
                             showDialog = false
                         }
                     }
@@ -182,11 +124,53 @@ fun DashboardScreen(
             },
 
             dismissButton = {
-
                 TextButton(
                     onClick = {
                         showDialog = false
                     }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showDeleteDialog) {
+
+        val vehicle = uiState.selectedVehicle
+
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteDialog = false
+            },
+            title = {
+                Text("Delete Vehicle?")
+            },
+            text = {
+                Column {
+                    Text("Vehicle: ${vehicle?.name ?: ""}")
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("This will permanently delete:")
+                    Text("• Vehicle")
+                    Text("• Fuel history")
+                    Text("• Mileage statistics")
+                }
+            },
+
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        vehicle?.let { viewModel.deleteVehicle(it.id) }
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false }
                 ) {
                     Text("Cancel")
                 }
@@ -233,24 +217,41 @@ fun DashboardScreen(
                         modifier = Modifier.padding(20.dp)
                     ) {
 
-                        TextButton(
-                            onClick = {
-                                showVehicleSelector = true
-                            }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
 
-                            val vehicle =
-                                uiState.selectedVehicle
+                            TextButton(
+                                onClick = {
+                                    showVehicleSelector = true
+                                }
+                            ) {
 
-                            val icon =
-                                if (
-                                    vehicle?.type?.name == "CAR"
-                                ) "🚗"
-                                else "🏍"
+                                val vehicle =
+                                    uiState.selectedVehicle
 
-                            Text(
-                                "$icon ${vehicle?.name ?: "No Vehicle"} ▼"
+                                val icon =
+                                    if (
+                                        vehicle?.type?.name == "CAR"
+                                    ) "🚗"
+                                    else "🏍"
+
+                                Text(
+                                    "$icon ${vehicle?.name ?: "No Vehicle"} ▼"
+                                )
+                            }
+
+                            Spacer(
+                                modifier = Modifier.weight(1f)
                             )
+
+                            TextButton(
+                                onClick = {
+                                    showDeleteDialog = true
+                                }
+                            ) {
+                                Text("Delete")
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))

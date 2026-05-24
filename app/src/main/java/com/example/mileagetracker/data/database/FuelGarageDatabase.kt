@@ -13,15 +13,13 @@ import com.example.mileagetracker.data.entity.Vehicle
         Vehicle::class,
         FuelEntry::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(
     com.example.mileagetracker.data.database.TypeConverters::class
 )
 abstract class FuelGarageDatabase : RoomDatabase() {
-
     abstract fun vehicleDao(): VehicleDao
-
     abstract fun fuelEntryDao(): FuelEntryDao
 }

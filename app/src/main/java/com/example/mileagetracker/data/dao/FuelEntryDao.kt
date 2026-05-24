@@ -14,10 +14,10 @@ interface FuelEntryDao {
     suspend fun insert(entry: FuelEntry)
 
     @Query("""
-        SELECT * FROM fuel_entries
-        WHERE vehicleId = :vehicleId
-        ORDER BY dateMillis DESC
-    """)
+    SELECT * FROM fuel_entries
+    WHERE vehicleId = :vehicleId
+    ORDER BY dateMillis DESC, id DESC
+""")
     fun getEntriesForVehicle(
         vehicleId: Long
     ): Flow<List<FuelEntry>>

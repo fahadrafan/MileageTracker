@@ -26,9 +26,14 @@ class DashboardViewModel(
 
     init {
         vehicleRepository.getVehicles().onEach { vehicles ->
-            val selectedVehicle = _uiState.value.selectedVehicle ?: vehicles.firstOrNull()
+            val currentSelection = _uiState.value.selectedVehicle
+            val selectedVehicle = vehicles.find {
+                it.id == currentSelection?.id
+            } ?: vehicles.firstOrNull()
+
             _uiState.value =
                 _uiState.value.copy(vehicles = vehicles, selectedVehicle = selectedVehicle)
+
             selectedVehicle?.let { observeStatistics(it.id) }
         }
             .launchIn(viewModelScope)
@@ -42,6 +47,12 @@ class DashboardViewModel(
                     type = type
                 )
             )
+        }
+    }
+
+    fun deleteVehicle(vehicleId: Long) {
+        viewModelScope.launch {
+            vehicleRepository.deleteVehicle(vehicleId)
         }
     }
 

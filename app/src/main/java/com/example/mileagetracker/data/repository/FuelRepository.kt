@@ -19,4 +19,8 @@ class FuelRepository(
     suspend fun getLatestEntry(vehicleId: Long): FuelEntry? {
         return fuelEntryDao.getLatestEntry(vehicleId)
     }
+
+    suspend fun deleteEntry(entryId: Long) {
+        fuelEntryDao.deleteEntry(entryId)
+    }
 }
