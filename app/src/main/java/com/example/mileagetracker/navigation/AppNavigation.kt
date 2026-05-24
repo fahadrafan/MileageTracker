@@ -23,6 +23,7 @@ object Routes {
     fun addFuel(vehicleId: Long): String {
         return "add_fuel/$vehicleId"
     }
+
     fun history(vehicleId: Long): String {
         return "history/$vehicleId"
     }
@@ -44,8 +45,12 @@ fun AppNavigation() {
 
             val app = context.applicationContext as FuelGarageApplication
 
-            val viewModel =
-                viewModel<DashboardViewModel>(factory = DashboardViewModelFactory(app.container.vehicleRepository))
+            val viewModel = viewModel<DashboardViewModel>(
+                factory = DashboardViewModelFactory(
+                    app.container.vehicleRepository,
+                    app.container.fuelRepository
+                )
+            )
 
             DashboardScreen(
                 viewModel = viewModel,

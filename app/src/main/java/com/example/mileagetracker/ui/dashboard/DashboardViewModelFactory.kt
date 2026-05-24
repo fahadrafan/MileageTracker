@@ -2,10 +2,12 @@ package com.example.mileagetracker.ui.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.mileagetracker.data.repository.FuelRepository
 import com.example.mileagetracker.data.repository.VehicleRepository
 
 class DashboardViewModelFactory(
-    private val repository: VehicleRepository
+    private val vehicleRepository: VehicleRepository,
+    private val fuelRepository: FuelRepository
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -14,7 +16,10 @@ class DashboardViewModelFactory(
     ): T {
 
         if (modelClass.isAssignableFrom(DashboardViewModel::class.java)) {
-            return DashboardViewModel(repository) as T
+            return DashboardViewModel(
+                vehicleRepository,
+                fuelRepository
+            ) as T
         }
 
         throw IllegalArgumentException(

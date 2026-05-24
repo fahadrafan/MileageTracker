@@ -6,17 +6,7 @@ import com.example.mileagetracker.data.repository.VehicleRepository
 import com.example.mileagetracker.data.repository.FuelRepository
 
 class AppContainer(context: Context) {
-
-    private val database =
-        DatabaseProvider.getDatabase(context)
-
-    val vehicleRepository =
-        VehicleRepository(
-            database.vehicleDao()
-        )
-
-    val fuelRepository =
-        FuelRepository(
-            database.fuelEntryDao()
-        )
+    private val database = DatabaseProvider.getDatabase(context)
+    val vehicleRepository = VehicleRepository(database.vehicleDao())
+    val fuelRepository = FuelRepository(database.fuelEntryDao())
 }

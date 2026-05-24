@@ -8,18 +8,11 @@ data class FuelEntry(
 
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-
     val vehicleId: Long,
-
     val dateMillis: Long,
-
     val odometerKm: Double,
-
     val amountPaid: Double,
-
     val fuelPrice: Double,
-
     val litres: Double,
-
     val fullTank: Boolean
 )

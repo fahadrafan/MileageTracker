@@ -27,6 +27,7 @@ fun DashboardScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
+    val stats = uiState.statistics
 
     var showDialog by remember {
         mutableStateOf(false)
@@ -260,7 +261,7 @@ fun DashboardScreen(
                         )
 
                         Text(
-                            text = "18.6 km/l",
+                            text = "%.1f km/l".format(stats.estimatedMileage),
                             style = MaterialTheme.typography.displaySmall
                         )
                     }
@@ -269,26 +270,53 @@ fun DashboardScreen(
 
             item {
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
 
                     StatCard(
-                        title = "Average",
-                        value = "17.9 km/l",
+                        title = "Average Mileage",
+                        value = "%.1f km/l".format(stats.averageVerifiedMileage),
                         modifier = Modifier.weight(1f)
                     )
 
                     StatCard(
                         title = "Cost/km",
-                        value = "₹5.66",
+                        value = "₹%.2f".format(stats.costPerKm),
                         modifier = Modifier.weight(1f)
                     )
                 }
             }
 
             item {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StatCard(
+                        title = "Distance Covered",
+                        value = "%.0f km".format(stats.totalDistance),
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatCard(
+                        title = "Total Fuel",
+                        value = "%.1f L".format(stats.fuelConsumed),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
 
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StatCard(
+                        title = "Total Spent",
+                        value = "₹%.0f".format(stats.totalSpent),
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatCard(
+                        title = "Last Verified",
+                        value = "%.1f km/l".format(stats.lastVerifiedMileage),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            item {
                 Button(
                     onClick = onHistoryClick,
                     modifier = Modifier.fillMaxWidth()
