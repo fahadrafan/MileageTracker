@@ -1,4 +1,4 @@
-# Mileage Tracker 🚗⛽
+# Fuel Garage 🚗⛽
 
 A modern Android application for tracking vehicle fuel fills, calculating mileage, monitoring fuel expenses, and analyzing fuel efficiency trends over time.
 
@@ -8,7 +8,7 @@ Built with **Kotlin**, **Jetpack Compose**, **Room Database**, and **Material De
 
 ## 📱 Project Overview
 
-Mileage Tracker helps vehicle owners:
+Fuel Garage helps vehicle owners:
 
 - Track fuel fill-ups
 - Calculate fuel efficiency automatically
