@@ -1,18 +1,17 @@
 package com.example.mileagetracker.navigation
 
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.navigation.compose.*
 import com.example.mileagetracker.ui.dashboard.DashboardScreen
-import com.example.mileagetracker.ui.fuel.AddFuelScreen
+import com.example.mileagetracker.ui.fuel.FuelEntryScreen
 import com.example.mileagetracker.ui.history.HistoryScreen
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mileagetracker.FuelGarageApplication
 import com.example.mileagetracker.ui.dashboard.DashboardViewModel
 import com.example.mileagetracker.ui.dashboard.DashboardViewModelFactory
-import com.example.mileagetracker.ui.fuel.AddFuelViewModel
-import com.example.mileagetracker.ui.fuel.AddFuelViewModelFactory
+import com.example.mileagetracker.ui.fuel.FuelEntryViewModel
+import com.example.mileagetracker.ui.fuel.FuelEntryViewModelFactory
 import com.example.mileagetracker.ui.history.HistoryViewModel
 import com.example.mileagetracker.ui.history.HistoryViewModelFactory
 
@@ -89,14 +88,14 @@ fun AppNavigation() {
             val context = LocalContext.current
             val app = context.applicationContext as FuelGarageApplication
             val viewModel =
-                viewModel<AddFuelViewModel>(
+                viewModel<FuelEntryViewModel>(
                     factory =
-                        AddFuelViewModelFactory(
+                        FuelEntryViewModelFactory(
                             app.container.fuelRepository,
                             app.container.vehicleRepository
                         )
                 )
-            AddFuelScreen(
+            FuelEntryScreen(
                 viewModel = viewModel,
                 vehicleId = vehicleId,
                 isEditMode = false,
@@ -123,9 +122,9 @@ fun AppNavigation() {
             val app = context.applicationContext as FuelGarageApplication
 
             val viewModel =
-                viewModel<AddFuelViewModel>(
+                viewModel<FuelEntryViewModel>(
                     factory =
-                        AddFuelViewModelFactory(
+                        FuelEntryViewModelFactory(
                             app.container.fuelRepository,
                             app.container.vehicleRepository
                         )
@@ -135,7 +134,7 @@ fun AppNavigation() {
                 viewModel.loadEntryForEdit(entryId)
             }
 
-            AddFuelScreen(
+            FuelEntryScreen(
                 viewModel = viewModel,
                 vehicleId = vehicleId,
                 isEditMode = true,

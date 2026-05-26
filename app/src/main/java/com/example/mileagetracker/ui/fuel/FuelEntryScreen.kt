@@ -27,8 +27,8 @@ import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddFuelScreen(
-    viewModel: AddFuelViewModel,
+fun FuelEntryScreen(
+    viewModel: FuelEntryViewModel,
     vehicleId: Long,
     isEditMode: Boolean = false,
     onBack: () -> Unit
@@ -110,7 +110,9 @@ fun AddFuelScreen(
 
             OutlinedTextField(
                 value = uiState.refillDateText,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 onValueChange = { viewModel.updateDateText(it) },
+                isError = uiState.dateError != null,
                 label = { Text("Refill Date") },
                 trailingIcon = {
                     IconButton(
@@ -132,26 +134,40 @@ fun AddFuelScreen(
                         }
                     }
             )
-
-            OutlinedTextField(
-                value = uiState.odometer,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                onValueChange = { viewModel.updateOdometer(it) },
-                label = { Text("Odometer Reading") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            if (uiState.lastOdometer.isNotBlank()) {
+            uiState.dateError?.let {
                 Text(
-                    text = "Last Reading: ${uiState.lastOdometer} km",
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
 
-            uiState.errorMessage?.let {
+            OutlinedTextField(
+                value = uiState.odometer,
+                onValueChange = { viewModel.updateOdometer(it) },
+                isError = uiState.odometerError != null,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                label = { Text("Odometer Reading") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged {
+                        if (!it.isFocused) {
+                            viewModel.onOdometerFocusLost()
+                        }
+                    }
+
+            )
+            uiState.odometerError?.let {
                 Text(
                     text = it,
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            if (uiState.lastOdometer.isNotBlank()) {
+                Text(
+                    text = "Last Reading: ${uiState.lastOdometer} km",
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
 
@@ -162,18 +178,23 @@ fun AddFuelScreen(
                         keyboardType =
                             KeyboardType.Decimal
                     ),
-                onValueChange = {
-                    viewModel.updateAmountPaid(it)
-                },
+                onValueChange = {                    viewModel.updateAmountPaid(it)                },
+                isError = uiState.amountPaidError != null,
                 label = { Text("Amount Paid (₹)") },
                 modifier = Modifier.fillMaxWidth()
             )
+            uiState.amountPaidError?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
 
             OutlinedTextField(
                 value = uiState.fuelPrice,
-                onValueChange = {
-                    viewModel.updateFuelPrice(it)
-                },
+                onValueChange = {                    viewModel.updateFuelPrice(it)                },
+                isError = uiState.fuelPriceError != null,
                 keyboardOptions =
                     KeyboardOptions(
                         keyboardType =
@@ -184,6 +205,13 @@ fun AddFuelScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+            uiState.fuelPriceError?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
 
             OutlinedTextField(
                 value = uiState.litres,

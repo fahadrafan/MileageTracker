@@ -1,6 +1,6 @@
 package com.example.mileagetracker.ui.fuel
 
-data class AddFuelUiState(
+data class FuelEntryUiState(
     val refillDateText: String = "",
     val refillDateMillis: Long = System.currentTimeMillis(),
     val odometer: String = "",
@@ -9,6 +9,10 @@ data class AddFuelUiState(
     val fuelPrice: String = "",
     val litres: String = "",
     val fullTank: Boolean = false,
-    val errorMessage: String? = null,
-    val saveSuccessful: Boolean = false
+    val saveSuccessful: Boolean = false,
+    val dateError: String? = null,
+    val odometerError: String? = null,
+    val fuelQuantityError: String? = null,
+    val amountPaidError: String? = null,
+    val fuelPriceError: String? = null
 )
