@@ -11,15 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.*
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.ui.Alignment
+import com.example.mileagetracker.ui.vehicle.VehicleDialog
 import com.example.mileagetracker.data.entity.Vehicle
 import com.example.mileagetracker.data.entity.VehicleType
 import com.example.mileagetracker.data.entity.FuelType
-import androidx.compose.material3.*
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExtendedFloatingActionButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,219 +84,112 @@ fun HomeScreen(
 
     if (showDialog) {
 
-        AlertDialog(
-            onDismissRequest = {
+        VehicleDialog(
+            title =
+                if (isEditMode) "Edit Vehicle"
+                else "Add Vehicle",
+
+            vehicleName = vehicleName,
+            registrationNumber = registrationNumber,
+            selectedFuelType = selectedFuelType,
+            selectedType = selectedType,
+
+            fuelTypeExpanded = fuelTypeExpanded,
+            vehicleTypeExpanded = vehicleTypeExpanded,
+
+            onVehicleNameChange = {
+                vehicleName = it
+            },
+
+            onRegistrationChange = {
+                registrationNumber = it
+            },
+
+            onFuelTypeChange = {
+                selectedFuelType = it
+            },
+
+            onVehicleTypeChange = {
+                selectedType = it
+            },
+
+            onFuelExpandedChange = {
+                fuelTypeExpanded = it
+            },
+
+            onVehicleExpandedChange = {
+                vehicleTypeExpanded = it
+            },
+
+            onSave = {
+
+                if (vehicleName.isBlank()) return@VehicleDialog
+
+                val alreadyExists =
+                    vehicles.any {
+
+                        if (isEditMode) {
+                            it.id != editingVehicleId &&
+                                    it.name.equals(
+                                        vehicleName.trim(),
+                                        ignoreCase = true
+                                    )
+                        } else {
+                            it.name.equals(
+                                vehicleName.trim(),
+                                ignoreCase = true
+                            )
+                        }
+                    }
+
+                if (alreadyExists) return@VehicleDialog
+
+                if (isEditMode) {
+
+                    editingVehicleId?.let { id ->
+
+                        onUpdateVehicle(
+                            id,
+                            vehicleName,
+                            registrationNumber,
+                            selectedFuelType,
+                            selectedType
+                        )
+                    }
+
+                } else {
+
+                    onAddVehicle(
+                        vehicleName,
+                        registrationNumber,
+                        selectedFuelType,
+                        selectedType
+                    )
+                }
+
+                vehicleName = ""
+                registrationNumber = ""
+                selectedFuelType = FuelType.PETROL
+                selectedType = VehicleType.CAR
+
+                isEditMode = false
+                editingVehicleId = null
+
                 showDialog = false
             },
 
-            title = {
-                Text(
-                    if (isEditMode) "Edit Vehicle"
-                    else "Add Vehicle"
-                )
-            },
+            onCancel = {
 
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = vehicleName,
-                        onValueChange = {
-                            vehicleName = it
-                        },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = {
-                            Text("Vehicle Name")
-                        }
-                    )
+                vehicleName = ""
+                registrationNumber = ""
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                selectedFuelType = FuelType.PETROL
+                selectedType = VehicleType.CAR
 
-                    OutlinedTextField(
-                        value = registrationNumber,
-                        onValueChange = {
-                            registrationNumber = it.uppercase()
-                        },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = {
-                            Text("Registration Number (Optional)")
-                        }
-                    )
+                isEditMode = false
+                editingVehicleId = null
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text("Fuel Type")
-
-                    ExposedDropdownMenuBox(
-                        expanded = fuelTypeExpanded,
-                        onExpandedChange = {
-                            fuelTypeExpanded = !fuelTypeExpanded
-                        }
-                    ) {
-                        OutlinedTextField(
-                            value = selectedFuelType.name.lowercase()
-                                .replaceFirstChar { it.uppercase() },
-                            onValueChange = {},
-                            readOnly = true,
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth(),
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(
-                                    expanded = fuelTypeExpanded
-                                )
-                            }
-                        )
-
-                        ExposedDropdownMenu(
-                            expanded = fuelTypeExpanded,
-                            onDismissRequest = {
-                                fuelTypeExpanded = false
-                            }
-                        ) {
-                            FuelType.entries.forEach { fuel ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            if (fuel.name.lowercase() == "cng" ||
-                                                fuel.name.lowercase() == "ev"
-                                            ) fuel.name.uppercase()
-                                            else fuel.name.lowercase()
-                                                .replaceFirstChar { it.uppercase() })
-                                    },
-                                    onClick = {
-                                        selectedFuelType = fuel
-                                        fuelTypeExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(
-                        modifier = Modifier.height(12.dp)
-                    )
-
-                    Text("Vehicle Type")
-                    ExposedDropdownMenuBox(
-                        expanded = vehicleTypeExpanded,
-                        onExpandedChange = {
-                            vehicleTypeExpanded = !vehicleTypeExpanded
-                        }
-                    ) {
-                        OutlinedTextField(
-                            value = selectedType.name.lowercase()
-                                .replaceFirstChar { it.uppercase() },
-                            onValueChange = {},
-                            readOnly = true,
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth(),
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(
-                                    expanded = vehicleTypeExpanded
-                                )
-                            }
-                        )
-
-                        ExposedDropdownMenu(
-                            expanded = vehicleTypeExpanded,
-                            onDismissRequest = {
-                                vehicleTypeExpanded = false
-                            }
-                        ) {
-                            VehicleType.entries.forEach { type ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            type.name.lowercase()
-                                                .replaceFirstChar { it.uppercase() }
-                                        )
-                                    },
-                                    onClick = {
-                                        selectedType = type
-                                        vehicleTypeExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                }
-            },
-
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (vehicleName.isNotBlank()) {
-                            val alreadyExists =
-                                vehicles.any {
-                                    if (isEditMode) {
-                                        it.id != editingVehicleId &&
-                                                it.name.equals(
-                                                    vehicleName.trim(),
-                                                    ignoreCase = true
-                                                )
-                                    } else {
-                                        it.name.equals(
-                                            vehicleName.trim(),
-                                            ignoreCase = true
-                                        )
-                                    }
-                                }
-
-                            if (alreadyExists) {
-                                return@TextButton
-                            }
-
-                            if (isEditMode) {
-                                editingVehicleId?.let { id ->
-                                    onUpdateVehicle(
-                                        id,
-                                        vehicleName,
-                                        registrationNumber,
-                                        selectedFuelType,
-                                        selectedType
-                                    )
-                                }
-                            } else {
-                                onAddVehicle(
-                                    vehicleName,
-                                    registrationNumber,
-                                    selectedFuelType,
-                                    selectedType
-                                )
-                            }
-
-                            vehicleName = ""
-                            selectedType = VehicleType.CAR
-                            registrationNumber = ""
-                            selectedFuelType = FuelType.PETROL
-                            isEditMode = false
-                            editingVehicleId = null
-                            showDialog = false
-                        }
-                    }
-                ) {
-                    Text("Save")
-                }
-            },
-
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        vehicleName = ""
-                        registrationNumber = ""
-                        selectedFuelType = FuelType.PETROL
-                        selectedType = VehicleType.CAR
-                        isEditMode = false
-                        editingVehicleId = null
-                        showDialog = false
-                    }
-                ) {
-                    Text("Cancel")
-                }
+                showDialog = false
             }
         )
     }
@@ -372,6 +262,41 @@ fun HomeScreen(
                 Spacer(
                     modifier = Modifier.height(12.dp)
                 )
+            }
+
+            if (vehicles.isEmpty()) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "⛽",
+                                style = MaterialTheme.typography.displayLarge
+                            )
+                            Spacer(
+                                modifier = Modifier.height(16.dp)
+                            )
+                            Text(
+                                text = "No vehicles added yet",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Spacer(
+                                modifier = Modifier.height(8.dp)
+                            )
+                            Text(
+                                text = "Tap + to add your first vehicle",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
             }
 
             items(vehicles) { vehicle ->

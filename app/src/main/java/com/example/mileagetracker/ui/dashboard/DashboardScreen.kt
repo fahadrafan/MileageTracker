@@ -15,10 +15,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import com.example.mileagetracker.ui.vehicle.VehicleDialog
 import com.example.mileagetracker.data.entity.FuelType
 import com.example.mileagetracker.data.entity.VehicleType
 import java.text.SimpleDateFormat
@@ -83,175 +82,59 @@ fun DashboardScreen(
 
     if (showDialog) {
 
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = {
-                Text("Edit Vehicle")
+        VehicleDialog(
+            title = "Edit Vehicle",
+
+            vehicleName = vehicleName,
+            registrationNumber = registrationNumber,
+            selectedFuelType = selectedFuelType,
+            selectedType = selectedType,
+
+            fuelTypeExpanded = fuelTypeExpanded,
+            vehicleTypeExpanded = vehicleTypeExpanded,
+
+            onVehicleNameChange = {
+                vehicleName = it
             },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = vehicleName,
-                        onValueChange = {
-                            vehicleName = it
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        label = {
-                            Text("Vehicle Name")
-                        }
+
+            onRegistrationChange = {
+                registrationNumber = it
+            },
+
+            onFuelTypeChange = {
+                selectedFuelType = it
+            },
+
+            onVehicleTypeChange = {
+                selectedType = it
+            },
+
+            onFuelExpandedChange = {
+                fuelTypeExpanded = it
+            },
+
+            onVehicleExpandedChange = {
+                vehicleTypeExpanded = it
+            },
+
+            onSave = {
+
+                editingVehicleId?.let { id ->
+
+                    viewModel.updateVehicle(
+                        vehicleId = id,
+                        name = vehicleName,
+                        registrationNumber = registrationNumber,
+                        fuelType = selectedFuelType,
+                        type = selectedType
                     )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    OutlinedTextField(
-                        value = registrationNumber,
-                        onValueChange = {
-                            registrationNumber = it.uppercase()
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        label = {
-                            Text("Registration Number (Optional)")
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text("Fuel Type")
-                    ExposedDropdownMenuBox(
-                        expanded = fuelTypeExpanded,
-                        onExpandedChange = {
-                            fuelTypeExpanded = !fuelTypeExpanded
-                        }
-                    ) {
-                        OutlinedTextField(
-                            value = selectedFuelType.name
-                                .lowercase()
-                                .replaceFirstChar { it.uppercase() },
-                            onValueChange = {},
-                            readOnly = true,
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth(),
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(
-                                    expanded = fuelTypeExpanded
-                                )
-                            }
-                        )
-
-                        ExposedDropdownMenu(
-                            expanded = fuelTypeExpanded,
-                            onDismissRequest = {
-                                fuelTypeExpanded = false
-                            }
-                        ) {
-                            FuelType.entries.forEach { fuel ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            if(fuel.name.lowercase() == "cng" ||
-                                                fuel.name.lowercase() == "ev")
-                                                fuel.name.uppercase()
-                                            else fuel.name.lowercase()
-                                                .replaceFirstChar { it.uppercase() }
-                                        )
-                                    },
-                                    onClick = {
-                                        selectedFuelType = fuel
-                                        fuelTypeExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text("Vehicle Type")
-
-                    ExposedDropdownMenuBox(
-                        expanded = vehicleTypeExpanded,
-                        onExpandedChange = {
-                            vehicleTypeExpanded = !vehicleTypeExpanded
-                        }
-                    ) {
-
-                        OutlinedTextField(
-                            value = selectedType.name
-                                .lowercase()
-                                .replaceFirstChar { it.uppercase() },
-                            onValueChange = {},
-                            readOnly = true,
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth(),
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(
-                                    expanded = vehicleTypeExpanded
-                                )
-                            }
-                        )
-
-                        ExposedDropdownMenu(
-                            expanded = vehicleTypeExpanded,
-                            onDismissRequest = {
-                                vehicleTypeExpanded = false
-                            }
-                        ) {
-                            VehicleType.entries.forEach { type ->
-
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            type.name
-                                                .lowercase()
-                                                .replaceFirstChar { it.uppercase() }
-                                        )
-                                    },
-                                    onClick = {
-                                        selectedType = type
-                                        vehicleTypeExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
                 }
+
+                showDialog = false
             },
 
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (vehicleName.isNotBlank()) {
-
-                            editingVehicleId?.let { id ->
-                                viewModel.updateVehicle(
-                                    vehicleId = id,
-                                    name = vehicleName,
-                                    registrationNumber = registrationNumber,
-                                    fuelType = selectedFuelType,
-                                    type = selectedType
-                                )
-                            }
-
-                            showDialog = false
-                        }
-                    }
-                ) {
-                    Text("Save")
-                }
-            },
-
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showDialog = false
-                    }
-                ) {
-                    Text("Cancel")
-                }
+            onCancel = {
+                showDialog = false
             }
         )
     }
