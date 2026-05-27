@@ -13,7 +13,7 @@ import com.example.mileagetracker.data.entity.Vehicle
         Vehicle::class,
         FuelEntry::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(

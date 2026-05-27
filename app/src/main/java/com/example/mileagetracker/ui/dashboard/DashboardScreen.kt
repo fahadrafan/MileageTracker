@@ -19,10 +19,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import com.example.mileagetracker.data.entity.FuelType
+import com.example.mileagetracker.data.entity.VehicleType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import com.example.mileagetracker.data.entity.VehicleType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +54,22 @@ fun DashboardScreen(
         mutableStateOf(VehicleType.CAR)
     }
 
+    var registrationNumber by remember {
+        mutableStateOf("")
+    }
+
+    var selectedFuelType by remember {
+        mutableStateOf(FuelType.PETROL)
+    }
+
+    var fuelTypeExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    var vehicleTypeExpanded by remember {
+        mutableStateOf(false)
+    }
+
     var isEditVehicle by remember {
         mutableStateOf(true)
     }
@@ -75,25 +92,131 @@ fun DashboardScreen(
                 Column {
                     OutlinedTextField(
                         value = vehicleName,
-                        onValueChange = { vehicleName = it },
-                        label = { Text("Vehicle Name") }
+                        onValueChange = {
+                            vehicleName = it
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        label = {
+                            Text("Vehicle Name")
+                        }
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(
-                            selected = selectedType == VehicleType.CAR,
-                            onClick = { selectedType = VehicleType.CAR }
+                    OutlinedTextField(
+                        value = registrationNumber,
+                        onValueChange = {
+                            registrationNumber = it.uppercase()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        label = {
+                            Text("Registration Number (Optional)")
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text("Fuel Type")
+                    ExposedDropdownMenuBox(
+                        expanded = fuelTypeExpanded,
+                        onExpandedChange = {
+                            fuelTypeExpanded = !fuelTypeExpanded
+                        }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedFuelType.name
+                                .lowercase()
+                                .replaceFirstChar { it.uppercase() },
+                            onValueChange = {},
+                            readOnly = true,
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth(),
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                    expanded = fuelTypeExpanded
+                                )
+                            }
                         )
-                        Text("Car")
+
+                        ExposedDropdownMenu(
+                            expanded = fuelTypeExpanded,
+                            onDismissRequest = {
+                                fuelTypeExpanded = false
+                            }
+                        ) {
+                            FuelType.entries.forEach { fuel ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            if(fuel.name.lowercase() == "cng" ||
+                                                fuel.name.lowercase() == "ev")
+                                                fuel.name.uppercase()
+                                            else fuel.name.lowercase()
+                                                .replaceFirstChar { it.uppercase() }
+                                        )
+                                    },
+                                    onClick = {
+                                        selectedFuelType = fuel
+                                        fuelTypeExpanded = false
+                                    }
+                                )
+                            }
+                        }
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(
-                            selected = selectedType == VehicleType.BIKE,
-                            onClick = { selectedType = VehicleType.BIKE }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text("Vehicle Type")
+
+                    ExposedDropdownMenuBox(
+                        expanded = vehicleTypeExpanded,
+                        onExpandedChange = {
+                            vehicleTypeExpanded = !vehicleTypeExpanded
+                        }
+                    ) {
+
+                        OutlinedTextField(
+                            value = selectedType.name
+                                .lowercase()
+                                .replaceFirstChar { it.uppercase() },
+                            onValueChange = {},
+                            readOnly = true,
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth(),
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                    expanded = vehicleTypeExpanded
+                                )
+                            }
                         )
-                        Text("Bike")
+
+                        ExposedDropdownMenu(
+                            expanded = vehicleTypeExpanded,
+                            onDismissRequest = {
+                                vehicleTypeExpanded = false
+                            }
+                        ) {
+                            VehicleType.entries.forEach { type ->
+
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            type.name
+                                                .lowercase()
+                                                .replaceFirstChar { it.uppercase() }
+                                        )
+                                    },
+                                    onClick = {
+                                        selectedType = type
+                                        vehicleTypeExpanded = false
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             },
@@ -107,6 +230,8 @@ fun DashboardScreen(
                                 viewModel.updateVehicle(
                                     vehicleId = id,
                                     name = vehicleName,
+                                    registrationNumber = registrationNumber,
+                                    fuelType = selectedFuelType,
                                     type = selectedType
                                 )
                             }
@@ -241,6 +366,8 @@ fun DashboardScreen(
                                         uiState.selectedVehicle?.let { vehicle ->
                                             editingVehicleId = vehicle.id
                                             vehicleName = vehicle.name
+                                            registrationNumber = vehicle.registrationNumber
+                                            selectedFuelType = vehicle.fuelType
                                             selectedType = vehicle.type
                                             isEditVehicle = true
                                             showDialog = true

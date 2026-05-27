@@ -2,6 +2,7 @@ package com.example.mileagetracker.ui.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mileagetracker.data.entity.FuelType
 import com.example.mileagetracker.data.entity.Vehicle
 import com.example.mileagetracker.data.entity.VehicleType
 import com.example.mileagetracker.data.repository.FuelRepository
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class DashboardViewModel(
@@ -34,15 +36,37 @@ class DashboardViewModel(
             _uiState.value =
                 _uiState.value.copy(vehicles = vehicles, selectedVehicle = selectedVehicle)
 
+            viewModelScope.launch {
+                val mileageMap = mutableMapOf<Long, Double>()
+                vehicles.forEach { vehicle ->
+                    val entries = fuelRepository.getFuelEntriesForVehicle(vehicle.id).first()
+                    mileageMap[vehicle.id] =
+                        MileageCalculator
+                            .calculateStatistics(entries)
+                            .estimatedMileage
+                }
+                _uiState.value =
+                    _uiState.value.copy(
+                        vehicleMileageMap = mileageMap
+                    )
+            }
+
             selectedVehicle?.let { observeStatistics(it.id) }
         }
             .launchIn(viewModelScope)
     }
 
-    fun addVehicle(name: String, type: VehicleType) {
+    fun addVehicle(
+        name: String,
+        registrationNumber: String,
+        fuelType: FuelType,
+        type: VehicleType
+    ) {
         viewModelScope.launch {
             val vehicle = Vehicle(
                 name = name,
+                registrationNumber = registrationNumber,
+                fuelType = fuelType,
                 type = type
             )
             val vehicleId = vehicleRepository.addVehicle(vehicle)
@@ -59,12 +83,16 @@ class DashboardViewModel(
     fun updateVehicle(
         vehicleId: Long,
         name: String,
+        registrationNumber: String,
+        fuelType: FuelType,
         type: VehicleType
     ) {
         viewModelScope.launch {
             val vehicle = Vehicle(
                 id = vehicleId,
                 name = name,
+                registrationNumber = registrationNumber,
+                fuelType = fuelType,
                 type = type
             )
             vehicleRepository.updateVehicle(vehicle)
@@ -123,15 +151,11 @@ class DashboardViewModel(
                 .collectLatest { entries ->
                     val stats = MileageCalculator.calculateStatistics(entries)
 
-                    val mileageMap = _uiState.value.vehicleMileageMap.toMutableMap()
-                    mileageMap[vehicleId] = stats.estimatedMileage
-
                     _uiState.value = _uiState.value.copy(
                         statistics = stats,
                         recentEntries = entries
                             .sortedByDescending { it.dateMillis }
                             .take(3),
-                        vehicleMileageMap = mileageMap
                     )
                 }
         }

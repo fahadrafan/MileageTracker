@@ -9,6 +9,7 @@ import com.example.mileagetracker.ui.history.HistoryScreen
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mileagetracker.FuelGarageApplication
+import com.example.mileagetracker.data.entity.FuelType
 import com.example.mileagetracker.ui.dashboard.DashboardViewModel
 import com.example.mileagetracker.ui.dashboard.DashboardViewModelFactory
 import com.example.mileagetracker.ui.fuel.FuelEntryViewModel
@@ -73,11 +74,31 @@ fun AppNavigation() {
                         Routes.vehicleDashboard(vehicleId)
                     )
                 },
-                onAddVehicle = { name, type ->
+                onAddVehicle = { name, registrationNumber, fuelType, type ->
                     viewModel.addVehicle(
                         name = name,
+                        registrationNumber = registrationNumber,
+                        fuelType = fuelType,
                         type = type
                     )
+                },
+                onUpdateVehicle = {
+                        id,
+                        name,
+                        registrationNumber,
+                        fuelType,
+                        type ->
+
+                    viewModel.updateVehicle(
+                        vehicleId = id,
+                        name = name,
+                        registrationNumber = registrationNumber,
+                        fuelType = fuelType,
+                        type = type
+                    )
+                },
+                onDeleteVehicle = { vehicleId ->
+                    viewModel.deleteVehicle(vehicleId)
                 }
             )
         }
@@ -119,10 +140,20 @@ fun AppNavigation() {
                     )
                 },
                 onBack = {
-                    navController.popBackStack()
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) {
+                            inclusive = false
+                        }
+                        launchSingleTop = true
+                    }
                 },
                 onVehicleDeleted = {
-                    navController.popBackStack()
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) {
+                            inclusive = false
+                        }
+                        launchSingleTop = true
+                    }
                 }
             )
         }

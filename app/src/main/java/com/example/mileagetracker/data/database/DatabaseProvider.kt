@@ -18,7 +18,8 @@ object DatabaseProvider {
                 context.applicationContext,
                 FuelGarageDatabase::class.java,
                 "fuel_garage.db"
-            ).build()
+            ).fallbackToDestructiveMigration(true)
+                .build()
 
             INSTANCE = instance
 
