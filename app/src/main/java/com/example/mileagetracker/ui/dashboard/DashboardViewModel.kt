@@ -84,6 +84,37 @@ class DashboardViewModel(
         }
     }
 
+    fun preloadVehicleMileage() {
+
+        viewModelScope.launch {
+
+            _uiState.value.vehicles.forEach { vehicle ->
+
+                fuelRepository
+                    .getFuelEntriesForVehicle(vehicle.id)
+                    .collectLatest { entries ->
+
+                        val mileage =
+                            MileageCalculator
+                                .calculateStatistics(entries)
+                                .estimatedMileage
+
+                        val map =
+                            _uiState.value
+                                .vehicleMileageMap
+                                .toMutableMap()
+
+                        map[vehicle.id] = mileage
+
+                        _uiState.value =
+                            _uiState.value.copy(
+                                vehicleMileageMap = map
+                            )
+                    }
+            }
+        }
+    }
+
     private fun observeStatistics(vehicleId: Long) {
         statisticsJob?.cancel()
         statisticsJob = viewModelScope.launch {
@@ -91,11 +122,16 @@ class DashboardViewModel(
                 .getFuelEntriesForVehicle(vehicleId)
                 .collectLatest { entries ->
                     val stats = MileageCalculator.calculateStatistics(entries)
+
+                    val mileageMap = _uiState.value.vehicleMileageMap.toMutableMap()
+                    mileageMap[vehicleId] = stats.estimatedMileage
+
                     _uiState.value = _uiState.value.copy(
                         statistics = stats,
                         recentEntries = entries
                             .sortedByDescending { it.dateMillis }
-                            .take(3)
+                            .take(3),
+                        vehicleMileageMap = mileageMap
                     )
                 }
         }

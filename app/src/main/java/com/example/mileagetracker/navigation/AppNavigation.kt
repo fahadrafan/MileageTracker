@@ -67,6 +67,7 @@ fun AppNavigation() {
 
             HomeScreen(
                 vehicles = uiState.vehicles,
+                mileageMap = uiState.vehicleMileageMap,
                 onVehicleClick = { vehicleId ->
                     navController.navigate(
                         Routes.vehicleDashboard(vehicleId)

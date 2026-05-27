@@ -19,6 +19,7 @@ import com.example.mileagetracker.data.entity.VehicleType
 @Composable
 fun HomeScreen(
     vehicles: List<Vehicle>,
+    mileageMap: Map<Long, Double>,
     onVehicleClick: (Long) -> Unit,
     onAddVehicle: (String, VehicleType) -> Unit
 ) {
@@ -161,6 +162,7 @@ fun HomeScreen(
                 VehicleCard(
                     name = vehicle.name,
                     type = vehicle.type.name,
+                    mileage = mileageMap[vehicle.id],
                     onClick = {
                         onVehicleClick(vehicle.id)
                     }

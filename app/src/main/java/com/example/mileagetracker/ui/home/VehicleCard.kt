@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 fun VehicleCard(
     name: String,
     type: String,
+    mileage: Double?,
     onClick: () -> Unit
 ) {
     Card(
@@ -38,6 +39,18 @@ fun VehicleCard(
                 )
 
                 Text(type)
+
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
+
+                Text(
+                    text = mileage?.let {
+                        if (it > 0) "%.1f km/l".format(it)
+                        else "-- km/l"
+                    } ?: "-- km/l",
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
     }
