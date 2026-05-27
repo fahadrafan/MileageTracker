@@ -7,7 +7,7 @@ data class FuelEntryUiState(
     val lastOdometer: String = "",
     val amountPaid: String = "",
     val fuelPrice: String = "",
-    val litres: String = "",
+    val fuelQuantity: String = "",
     val fullTank: Boolean = false,
     val saveSuccessful: Boolean = false,
     val dateError: String? = null,

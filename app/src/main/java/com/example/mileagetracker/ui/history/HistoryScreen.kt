@@ -196,7 +196,7 @@ private fun FuelEntryCard(
             Text("Odometer Reading: ${entry.odometerKm} km")
             Text("Amount Paid: ₹${entry.amountPaid}")
             Text("Fuel Price: ₹%.2f/L".format(entry.fuelPrice))
-            Text("Litres: %.2f L".format(entry.litres))
+            Text("Litres: %.2f L".format(entry.fuelQuantity))
 
             if (entry.fullTank) {
                 Spacer(modifier = Modifier.height(6.dp))

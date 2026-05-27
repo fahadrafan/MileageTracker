@@ -8,6 +8,11 @@ class FuelRepository(
     private val fuelEntryDao: FuelEntryDao
 ) {
 
+    suspend fun getEntriesForVehicleList(
+        vehicleId: Long
+    ): List<FuelEntry> {
+        return fuelEntryDao.getEntriesForVehicleList(vehicleId)
+    }
     suspend fun addFuelEntry(fuelEntry: FuelEntry) {
         fuelEntryDao.insert(fuelEntry)
     }

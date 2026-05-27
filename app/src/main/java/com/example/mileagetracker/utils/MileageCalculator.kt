@@ -1,7 +1,6 @@
 package com.example.mileagetracker.utils
 
 import com.example.mileagetracker.data.entity.FuelEntry
-import com.example.mileagetracker.utils.VehicleStatistics
 
 data class VerifiedMileageResult(
     val startOdometer: Double,
@@ -27,10 +26,10 @@ object MileageCalculator {
         if (distance <= 0) {
             return 0.0
         }
-        if (currentEntry.litres <= 0) {
+        if (currentEntry.fuelQuantity <= 0) {
             return 0.0
         }
-        return distance / currentEntry.litres
+        return distance / currentEntry.fuelQuantity
     }
 
     /**
@@ -58,7 +57,7 @@ object MileageCalculator {
         if (distance <= 0) {
             return 0.0
         }
-        val totalFuelUsed = intermediateEntries.sumOf { it.litres } + endFullTank.litres
+        val totalFuelUsed = intermediateEntries.sumOf { it.fuelQuantity } + endFullTank.fuelQuantity
         if (totalFuelUsed <= 0) {
             return 0.0
         }
@@ -86,8 +85,8 @@ object MileageCalculator {
                     val mileage =
                         calculateVerifiedMileage(startFullTank, entry, intermediateEntries)
                     val fuelUsed = intermediateEntries.sumOf {
-                        it.litres
-                    } + entry.litres
+                        it.fuelQuantity
+                    } + entry.fuelQuantity
 
                     results.add(
                         VerifiedMileageResult(
@@ -129,7 +128,7 @@ object MileageCalculator {
         val sortedEntries = entries.sortedBy { it.odometerKm }
         val latestEntry = entries.maxByOrNull { it.dateMillis }
         val totalSpent = entries.sumOf { it.amountPaid }
-        val fuelConsumed = entries.sumOf { it.litres }
+        val fuelConsumed = entries.sumOf { it.fuelQuantity }
         val totalDistance =
             if (sortedEntries.size >= 2) {
                 maxOf(
@@ -184,7 +183,7 @@ object MileageCalculator {
             fuelEntryCount = entries.size,
             lastRefuelDate = latestEntry?.dateMillis ?: 0L,
             lastRefuelCost = latestEntry?.amountPaid ?: 0.0,
-            lastRefuelLitres = latestEntry?.litres ?: 0.0,
+            lastRefuelLitres = latestEntry?.fuelQuantity ?: 0.0,
             lastRefuelFullTank = latestEntry?.fullTank ?: false
         )
     }

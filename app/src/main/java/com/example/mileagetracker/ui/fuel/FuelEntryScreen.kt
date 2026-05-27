@@ -147,7 +147,7 @@ fun FuelEntryScreen(
                 onValueChange = { viewModel.updateOdometer(it) },
                 isError = uiState.odometerError != null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                label = { Text("Odometer Reading") },
+                label = { Text("Odometer Reading (km)") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .onFocusChanged {
@@ -214,10 +214,10 @@ fun FuelEntryScreen(
             }
 
             OutlinedTextField(
-                value = uiState.litres,
+                value = uiState.fuelQuantity,
                 onValueChange = {},
                 label = {
-                    Text("Litres")
+                    Text("Fuel Quantity (Litres) - Auto Calculated")
                 },
                 enabled = false,
                 modifier = Modifier.fillMaxWidth()

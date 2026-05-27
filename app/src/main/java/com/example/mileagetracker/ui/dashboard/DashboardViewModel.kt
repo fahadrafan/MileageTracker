@@ -76,6 +76,14 @@ class DashboardViewModel(
         observeStatistics(vehicle.id)
     }
 
+    fun selectVehicleById(vehicleId: Long) {
+        viewModelScope.launch {
+            vehicleRepository.getVehicleById(vehicleId)?.let {
+                selectVehicle(it)
+            }
+        }
+    }
+
     private fun observeStatistics(vehicleId: Long) {
         statisticsJob?.cancel()
         statisticsJob = viewModelScope.launch {

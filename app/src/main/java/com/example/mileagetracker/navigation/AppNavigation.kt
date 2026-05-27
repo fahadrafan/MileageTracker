@@ -2,6 +2,7 @@ package com.example.mileagetracker.navigation
 
 import androidx.compose.runtime.*
 import androidx.navigation.compose.*
+import androidx.compose.material3.*
 import com.example.mileagetracker.ui.dashboard.DashboardScreen
 import com.example.mileagetracker.ui.fuel.FuelEntryScreen
 import com.example.mileagetracker.ui.history.HistoryScreen
@@ -14,12 +15,18 @@ import com.example.mileagetracker.ui.fuel.FuelEntryViewModel
 import com.example.mileagetracker.ui.fuel.FuelEntryViewModelFactory
 import com.example.mileagetracker.ui.history.HistoryViewModel
 import com.example.mileagetracker.ui.history.HistoryViewModelFactory
+import com.example.mileagetracker.ui.home.HomeScreen
 
 object Routes {
-    const val DASHBOARD = "dashboard"
+    const val HOME = "home"
+    const val VEHICLE_DASHBOARD = "vehicle_dashboard/{vehicleId}"
     const val ADD_FUEL = "add_fuel/{vehicleId}"
     const val HISTORY = "history/{vehicleId}"
     const val EDIT_FUEL = "edit_fuel/{vehicleId}/{entryId}"
+
+    fun vehicleDashboard(vehicleId: Long): String {
+        return "vehicle_dashboard/$vehicleId"
+    }
     fun addFuel(vehicleId: Long): String {
         return "add_fuel/$vehicleId"
     }
@@ -41,12 +48,12 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.DASHBOARD
+        startDestination = Routes.HOME
     ) {
 
-        composable(Routes.DASHBOARD) {
-            val context = LocalContext.current
+        composable(Routes.HOME) {
 
+            val context = LocalContext.current
             val app = context.applicationContext as FuelGarageApplication
 
             val viewModel = viewModel<DashboardViewModel>(
@@ -56,24 +63,65 @@ fun AppNavigation() {
                 )
             )
 
+            val uiState by viewModel.uiState.collectAsState()
+
+            HomeScreen(
+                vehicles = uiState.vehicles,
+                onVehicleClick = { vehicleId ->
+                    navController.navigate(
+                        Routes.vehicleDashboard(vehicleId)
+                    )
+                },
+                onAddVehicle = { name, type ->
+                    viewModel.addVehicle(
+                        name = name,
+                        type = type
+                    )
+                }
+            )
+        }
+
+        composable(
+            route = Routes.VEHICLE_DASHBOARD
+        ) { backStackEntry ->
+
+            val vehicleId =
+                backStackEntry.arguments
+                    ?.getString("vehicleId")
+                    ?.toLongOrNull()
+                    ?: return@composable
+
+            val context = LocalContext.current
+            val app = context.applicationContext as FuelGarageApplication
+
+            val viewModel = viewModel<DashboardViewModel>(
+                factory = DashboardViewModelFactory(
+                    app.container.vehicleRepository,
+                    app.container.fuelRepository
+                )
+            )
+
+            LaunchedEffect(vehicleId) {
+                viewModel.selectVehicleById(vehicleId)
+            }
+
             DashboardScreen(
                 viewModel = viewModel,
                 onAddFuelClick = {
-
-                    val vehicleId =
-                        viewModel.uiState.value.selectedVehicle?.id
-
-                    if (vehicleId != null) {
-                        navController.navigate(
-                            Routes.addFuel(vehicleId)
-                        )
-                    }
+                    navController.navigate(
+                        Routes.addFuel(vehicleId)
+                    )
                 },
                 onHistoryClick = {
-                    val vehicleId = viewModel.uiState.value.selectedVehicle?.id
-                    if (vehicleId != null) {
-                        navController.navigate(Routes.history(vehicleId))
-                    }
+                    navController.navigate(
+                        Routes.history(vehicleId)
+                    )
+                },
+                onBack = {
+                    navController.popBackStack()
+                },
+                onVehicleDeleted = {
+                    navController.popBackStack()
                 }
             )
         }

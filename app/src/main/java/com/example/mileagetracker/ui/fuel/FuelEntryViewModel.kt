@@ -171,7 +171,7 @@ class FuelEntryViewModel(
     }
 
     fun updateLitres(value: String) {
-        _uiState.value = _uiState.value.copy(litres = value)
+        _uiState.value = _uiState.value.copy(fuelQuantity = value)
     }
 
     fun updateAmountPaid(value: String) {
@@ -273,7 +273,7 @@ class FuelEntryViewModel(
                 odometerKm = state.odometer.toDouble(),
                 amountPaid = state.amountPaid.toDouble(),
                 fuelPrice = state.fuelPrice.toDouble(),
-                litres = state.litres.toDouble(),
+                fuelQuantity = state.fuelQuantity.toDouble(),
                 fullTank = state.fullTank
             )
             if (editingEntryId == null) {
@@ -340,7 +340,7 @@ class FuelEntryViewModel(
                     odometer = entry.odometerKm.toInt().toString(),
                     amountPaid = entry.amountPaid.toString(),
                     fuelPrice = entry.fuelPrice.toString(),
-                    litres = String.format("%.2f", entry.litres),
+                    fuelQuantity = String.format("%.2f", entry.fuelQuantity),
                     fullTank = entry.fullTank
                 )
         }
@@ -355,11 +355,11 @@ class FuelEntryViewModel(
             || price == null
             || price <= 0
         ) {
-            _uiState.value = _uiState.value.copy(litres = "")
+            _uiState.value = _uiState.value.copy(fuelQuantity = "")
             return
         }
         val litres = amount / price
-        _uiState.value = _uiState.value.copy(litres = String.format("%.2f", litres))
+        _uiState.value = _uiState.value.copy(fuelQuantity = String.format("%.2f", litres))
     }
 
     fun isEditing(): Boolean {

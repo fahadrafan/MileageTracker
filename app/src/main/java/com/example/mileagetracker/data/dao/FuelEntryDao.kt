@@ -36,6 +36,15 @@ interface FuelEntryDao {
         vehicleId: Long
     ): Flow<List<FuelEntry>>
 
+    @Query("""
+    SELECT * FROM fuel_entries
+    WHERE vehicleId = :vehicleId
+    ORDER BY odometerKm DESC
+""")
+    suspend fun getEntriesForVehicleList(
+        vehicleId: Long
+    ): List<FuelEntry>
+
     @Query("DELETE FROM fuel_entries WHERE id = :id")
     suspend fun deleteEntry(id: Long)
 

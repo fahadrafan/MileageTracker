@@ -26,6 +26,6 @@ data class FuelEntry(
     val odometerKm: Double,
     val amountPaid: Double,
     val fuelPrice: Double,
-    val litres: Double,
+    val fuelQuantity: Double,
     val fullTank: Boolean
 )
