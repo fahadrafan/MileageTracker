@@ -21,6 +21,15 @@ import androidx.compose.material.icons.filled.Delete
 import com.example.mileagetracker.data.entity.FuelEntry
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.mileagetracker.data.preferences.UserPreferencesRepository
+import com.example.mileagetracker.data.preferences.model.Currency
+import com.example.mileagetracker.data.preferences.model.DistanceUnit
+import com.example.mileagetracker.data.preferences.model.FuelUnit
+import com.example.mileagetracker.utils.formatCurrency
+import com.example.mileagetracker.utils.formatDistance
+import com.example.mileagetracker.utils.formatFuel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,7 +39,33 @@ fun HistoryScreen(
     onEditEntry: (FuelEntry) -> Unit
 ) {
     val entries by viewModel.entries.collectAsState()
+
+    val context = LocalContext.current
+
+    val preferencesRepository = remember {
+        UserPreferencesRepository(context)
+    }
+
+    val distanceUnit by preferencesRepository
+        .distanceUnit
+        .collectAsStateWithLifecycle(
+            initialValue = DistanceUnit.KM
+        )
+
+    val fuelUnit by preferencesRepository
+        .fuelUnit
+        .collectAsStateWithLifecycle(
+            initialValue = FuelUnit.LITRES
+        )
+
+    val currency by preferencesRepository
+        .currency
+        .collectAsStateWithLifecycle(
+            initialValue = Currency.INR
+        )
+
     var entryToDelete by remember { mutableStateOf<FuelEntry?>(null) }
+
     if (entryToDelete != null) {
         AlertDialog(
             onDismissRequest = { entryToDelete = null },
@@ -104,6 +139,9 @@ fun HistoryScreen(
                 items(entries) { entry ->
                     FuelEntryCard(
                         entry = entry,
+                        distanceUnit = distanceUnit,
+                        fuelUnit = fuelUnit,
+                        currency = currency,
                         onEditClick = {
                             onEditEntry(entry)
                         },
@@ -120,6 +158,9 @@ fun HistoryScreen(
 @Composable
 private fun FuelEntryCard(
     entry: FuelEntry,
+    distanceUnit: DistanceUnit,
+    fuelUnit: FuelUnit,
+    currency: Currency,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
@@ -193,10 +234,41 @@ private fun FuelEntryCard(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Odometer Reading: ${entry.odometerKm} km")
-            Text("Amount Paid: ₹${entry.amountPaid}")
-            Text("Fuel Price: ₹%.2f/L".format(entry.fuelPrice))
-            Text("Litres: %.2f L".format(entry.fuelQuantity))
+            Text(
+                "Odometer Reading: ${
+                    formatDistance(
+                        entry.odometerKm,
+                        distanceUnit
+                    )
+                }"
+            )
+            Text(
+                "Amount Paid: ${
+                    formatCurrency(
+                        entry.amountPaid,
+                        currency
+                    )
+                }"
+            )
+            Text(
+                "Fuel Price: ${
+                    formatCurrency(
+                        entry.fuelPrice,
+                        currency
+                    )
+                }/${
+                    if (fuelUnit == FuelUnit.GALLONS) "gal"
+                    else "L"
+                }"
+            )
+            Text(
+                "Fuel Quantity: ${
+                    formatFuel(
+                        entry.fuelQuantity,
+                        fuelUnit
+                    )
+                }"
+            )
 
             if (entry.fullTank) {
                 Spacer(modifier = Modifier.height(6.dp))

@@ -63,4 +63,5 @@ dependencies {
     ksp("androidx.room:room-compiler:2.7.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }

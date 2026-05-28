@@ -19,6 +19,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.mileagetracker.data.preferences.UserPreferencesRepository
+import com.example.mileagetracker.data.preferences.model.DistanceUnit
+import com.example.mileagetracker.utils.formatMileage
 
 @Composable
 fun VehicleCard(
@@ -31,6 +36,18 @@ fun VehicleCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val context = LocalContext.current
+
+    val preferencesRepository = remember {
+        UserPreferencesRepository(context)
+    }
+
+    val distanceUnit by preferencesRepository
+        .distanceUnit
+        .collectAsStateWithLifecycle(
+            initialValue = DistanceUnit.KM
+        )
+
     var showMenu by remember {
         mutableStateOf(false)
     }
@@ -115,12 +132,11 @@ fun VehicleCard(
 
                 Text(
                     text = mileage?.let {
-                        if (it > 0) "%.1f".format(it)
+                        if (it > 0) formatMileage(it, distanceUnit)
                         else "--"
                     } ?: "--",
                     style = MaterialTheme.typography.headlineSmall
                 )
-                Text("km/l")
             }
         }
     }

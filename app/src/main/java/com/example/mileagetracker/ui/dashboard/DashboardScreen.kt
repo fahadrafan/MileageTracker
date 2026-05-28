@@ -23,6 +23,16 @@ import com.example.mileagetracker.data.entity.VehicleType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.mileagetracker.data.preferences.UserPreferencesRepository
+import com.example.mileagetracker.data.preferences.model.Currency
+import com.example.mileagetracker.data.preferences.model.DistanceUnit
+import com.example.mileagetracker.data.preferences.model.FuelUnit
+import com.example.mileagetracker.utils.formatCurrency
+import com.example.mileagetracker.utils.formatDistance
+import com.example.mileagetracker.utils.formatFuel
+import com.example.mileagetracker.utils.formatMileage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,6 +46,29 @@ fun DashboardScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     val stats = uiState.statistics
+    val context = LocalContext.current
+
+    val preferencesRepository = remember {
+        UserPreferencesRepository(context)
+    }
+
+    val distanceUnit by preferencesRepository
+        .distanceUnit
+        .collectAsStateWithLifecycle(
+            initialValue = DistanceUnit.KM
+        )
+
+    val fuelUnit by preferencesRepository
+        .fuelUnit
+        .collectAsStateWithLifecycle(
+            initialValue = FuelUnit.LITRES
+        )
+
+    val currency by preferencesRepository
+        .currency
+        .collectAsStateWithLifecycle(
+            initialValue = Currency.INR
+        )
 
     var showDialog by remember {
         mutableStateOf(false)
@@ -277,7 +310,10 @@ fun DashboardScreen(
                         )
 
                         Text(
-                            text = "%.1f km/l".format(stats.estimatedMileage),
+                            text = formatMileage(
+                                stats.estimatedMileage,
+                                distanceUnit
+                            ),
                             style = MaterialTheme.typography.displaySmall
                         )
 
@@ -295,12 +331,18 @@ fun DashboardScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StatCard(
                         title = "Average Mileage",
-                        value = "%.1f km/l".format(stats.averageVerifiedMileage),
+                        value = formatMileage(
+                            stats.averageVerifiedMileage,
+                            distanceUnit
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
                         title = "Cost/km",
-                        value = "₹%.2f".format(stats.costPerKm),
+                        value = formatCurrency(
+                            stats.costPerKm,
+                            currency
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -310,12 +352,18 @@ fun DashboardScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StatCard(
                         title = "Distance Covered",
-                        value = "%.0f km".format(stats.totalDistance),
+                        value = formatDistance(
+                            stats.totalDistance,
+                            distanceUnit
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
                         title = "Total Fuel",
-                        value = "%.1f L".format(stats.fuelConsumed),
+                        value = formatFuel(
+                            stats.fuelConsumed,
+                            fuelUnit
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -325,12 +373,18 @@ fun DashboardScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StatCard(
                         title = "Total Spent",
-                        value = "₹%.0f".format(stats.totalSpent),
+                        value = formatCurrency(
+                            stats.totalSpent,
+                            currency
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
                         title = "Last Verified",
-                        value = "%.1f km/l".format(stats.lastVerifiedMileage),
+                        value = formatMileage(
+                            stats.lastVerifiedMileage,
+                            distanceUnit
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -364,11 +418,17 @@ fun DashboardScreen(
                                         modifier = Modifier.weight(1f)
                                     )
                                     Text(
-                                        text = "₹%.0f".format(entry.amountPaid),
+                                        text = formatCurrency(
+                                            entry.amountPaid,
+                                            currency
+                                        ),
                                         modifier = Modifier.weight(1f)
                                     )
                                     Text(
-                                        text = "%.1f L".format(entry.fuelQuantity)
+                                        text = formatFuel(
+                                            entry.fuelQuantity,
+                                            fuelUnit
+                                        )
                                     )
                                 }
                                 if (entry != uiState.recentEntries.last()) {

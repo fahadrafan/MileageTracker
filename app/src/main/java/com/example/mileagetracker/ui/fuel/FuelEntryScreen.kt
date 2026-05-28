@@ -24,6 +24,12 @@ import androidx.compose.material3.SelectableDates
 import java.time.Instant
 import java.time.ZoneId
 import java.time.LocalDate
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.mileagetracker.data.preferences.UserPreferencesRepository
+import com.example.mileagetracker.data.preferences.model.Currency
+import com.example.mileagetracker.data.preferences.model.DistanceUnit
+import com.example.mileagetracker.data.preferences.model.FuelUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +41,32 @@ fun FuelEntryScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
+
     var showDatePicker by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+
+    val preferencesRepository = remember {
+        UserPreferencesRepository(context)
+    }
+
+    val distanceUnit by preferencesRepository
+        .distanceUnit
+        .collectAsStateWithLifecycle(
+            initialValue = DistanceUnit.KM
+        )
+
+    val fuelUnit by preferencesRepository
+        .fuelUnit
+        .collectAsStateWithLifecycle(
+            initialValue = FuelUnit.LITRES
+        )
+
+    val currency by preferencesRepository
+        .currency
+        .collectAsStateWithLifecycle(
+            initialValue = Currency.INR
+        )
 
     LaunchedEffect(vehicleId) {
         if (!isEditMode) {
@@ -147,7 +178,14 @@ fun FuelEntryScreen(
                 onValueChange = { viewModel.updateOdometer(it) },
                 isError = uiState.odometerError != null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                label = { Text("Odometer Reading (km)") },
+                label = {
+                    Text(
+                        "Odometer Reading (${
+                            if (distanceUnit == DistanceUnit.MILES) "mi"
+                            else "km"
+                        })"
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .onFocusChanged {
@@ -166,7 +204,11 @@ fun FuelEntryScreen(
             }
             if (uiState.lastOdometer.isNotBlank()) {
                 Text(
-                    text = "Last Reading: ${uiState.lastOdometer} km",
+                    text =
+                        "Last Reading: ${uiState.lastOdometer} ${
+                            if (distanceUnit == DistanceUnit.MILES) "mi"
+                            else "km"
+                        }",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -178,9 +220,9 @@ fun FuelEntryScreen(
                         keyboardType =
                             KeyboardType.Decimal
                     ),
-                onValueChange = {                    viewModel.updateAmountPaid(it)                },
+                onValueChange = { viewModel.updateAmountPaid(it) },
                 isError = uiState.amountPaidError != null,
-                label = { Text("Amount Paid (₹)") },
+                label = { Text("Amount Paid (${currency.symbol})") },
                 modifier = Modifier.fillMaxWidth()
             )
             uiState.amountPaidError?.let {
@@ -193,7 +235,7 @@ fun FuelEntryScreen(
 
             OutlinedTextField(
                 value = uiState.fuelPrice,
-                onValueChange = {                    viewModel.updateFuelPrice(it)                },
+                onValueChange = { viewModel.updateFuelPrice(it) },
                 isError = uiState.fuelPriceError != null,
                 keyboardOptions =
                     KeyboardOptions(
@@ -201,7 +243,12 @@ fun FuelEntryScreen(
                             KeyboardType.Decimal
                     ),
                 label = {
-                    Text("Fuel Price (₹/L)")
+                    Text(
+                        "Fuel Price (${currency.symbol}/${
+                            if (fuelUnit == FuelUnit.GALLONS) "gal"
+                            else "L"
+                        })"
+                    )
                 },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -217,7 +264,12 @@ fun FuelEntryScreen(
                 value = uiState.fuelQuantity,
                 onValueChange = {},
                 label = {
-                    Text("Fuel Quantity (Litres) - Auto Calculated")
+                    Text(
+                        "Fuel Quantity (${
+                            if (fuelUnit == FuelUnit.GALLONS) "Gallons"
+                            else "Litres"
+                        }) - Auto Calculated"
+                    )
                 },
                 enabled = false,
                 modifier = Modifier.fillMaxWidth()

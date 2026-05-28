@@ -1,25 +1,33 @@
 package com.example.mileagetracker.navigation
 
-import androidx.compose.runtime.*
-import androidx.navigation.compose.*
-import androidx.compose.material3.*
-import com.example.mileagetracker.ui.dashboard.DashboardScreen
-import com.example.mileagetracker.ui.fuel.FuelEntryScreen
-import com.example.mileagetracker.ui.history.HistoryScreen
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.mileagetracker.FuelGarageApplication
-import com.example.mileagetracker.data.entity.FuelType
+import com.example.mileagetracker.data.preferences.UserPreferencesRepository
+import com.example.mileagetracker.ui.dashboard.DashboardScreen
 import com.example.mileagetracker.ui.dashboard.DashboardViewModel
 import com.example.mileagetracker.ui.dashboard.DashboardViewModelFactory
+import com.example.mileagetracker.ui.fuel.FuelEntryScreen
 import com.example.mileagetracker.ui.fuel.FuelEntryViewModel
 import com.example.mileagetracker.ui.fuel.FuelEntryViewModelFactory
+import com.example.mileagetracker.ui.history.HistoryScreen
 import com.example.mileagetracker.ui.history.HistoryViewModel
 import com.example.mileagetracker.ui.history.HistoryViewModelFactory
 import com.example.mileagetracker.ui.home.HomeScreen
+import com.example.mileagetracker.ui.settings.SettingsScreen
+import com.example.mileagetracker.ui.settings.SettingsViewModel
+import com.example.mileagetracker.ui.settings.SettingsViewModelFactory
 
 object Routes {
     const val HOME = "home"
+    const val SETTINGS = "settings"
     const val VEHICLE_DASHBOARD = "vehicle_dashboard/{vehicleId}"
     const val ADD_FUEL = "add_fuel/{vehicleId}"
     const val HISTORY = "history/{vehicleId}"
@@ -99,6 +107,27 @@ fun AppNavigation() {
                 },
                 onDeleteVehicle = { vehicleId ->
                     viewModel.deleteVehicle(vehicleId)
+                },
+                onSettingsClick = {
+                    navController.navigate("settings")
+                }
+            )
+        }
+
+        composable("settings") {
+
+            val context = LocalContext.current
+
+            val viewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModelFactory(
+                    UserPreferencesRepository(context)
+                )
+            )
+
+            SettingsScreen(
+                viewModel = viewModel,
+                onBackClick = {
+                    navController.popBackStack()
                 }
             )
         }
