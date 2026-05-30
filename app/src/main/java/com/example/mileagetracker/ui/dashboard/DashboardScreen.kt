@@ -33,6 +33,8 @@ import com.example.mileagetracker.utils.formatCurrency
 import com.example.mileagetracker.utils.formatDistance
 import com.example.mileagetracker.utils.formatFuel
 import com.example.mileagetracker.utils.formatMileage
+import com.example.mileagetracker.ui.vehicle.VehicleValidationDialog
+import androidx.compose.runtime.LaunchedEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,7 +113,12 @@ fun DashboardScreen(
         mutableStateOf(false)
     }
 
-
+    VehicleValidationDialog(
+        error = uiState.vehicleValidationError,
+        onDismiss = {
+            viewModel.clearVehicleValidationError()
+        }
+    )
 
     if (showDialog) {
 
@@ -151,9 +158,7 @@ fun DashboardScreen(
             },
 
             onSave = {
-
                 editingVehicleId?.let { id ->
-
                     viewModel.updateVehicle(
                         vehicleId = id,
                         name = vehicleName,
@@ -162,8 +167,6 @@ fun DashboardScreen(
                         type = selectedType
                     )
                 }
-
-                showDialog = false
             },
 
             onCancel = {
@@ -439,6 +442,15 @@ fun DashboardScreen(
                     }
                 }
             }
+        }
+    }
+    LaunchedEffect(uiState.vehicleSaveSuccessful) {
+
+        if (uiState.vehicleSaveSuccessful) {
+
+            showDialog = false
+
+            viewModel.clearVehicleSaveSuccessful()
         }
     }
 }

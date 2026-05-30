@@ -9,5 +9,7 @@ data class DashboardUiState(
     val selectedVehicle: Vehicle? = null,
     val statistics: VehicleStatistics = VehicleStatistics(),
     val recentEntries: List<FuelEntry> = emptyList(),
-    val vehicleMileageMap: Map<Long, Double> = emptyMap()
+    val vehicleMileageMap: Map<Long, Double> = emptyMap(),
+    val vehicleValidationError: String? = null,
+    val vehicleSaveSuccessful: Boolean = false,
 )

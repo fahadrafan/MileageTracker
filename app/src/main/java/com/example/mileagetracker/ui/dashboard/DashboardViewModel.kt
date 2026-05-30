@@ -63,14 +63,35 @@ class DashboardViewModel(
         type: VehicleType
     ) {
         viewModelScope.launch {
+            val formattedName = formatVehicleName(name)
+            val trimmedRegistration = registrationNumber.trim()
+            val error =
+                validateVehicle(
+                    vehicleId = null,
+                    name = formattedName,
+                    registrationNumber = trimmedRegistration
+                )
+            if (error != null) {
+                _uiState.value =
+                    _uiState.value.copy(
+                        vehicleValidationError = error
+                    )
+                return@launch
+            }
             val vehicle = Vehicle(
-                name = name,
-                registrationNumber = registrationNumber,
+                name = formattedName,
+                registrationNumber = trimmedRegistration,
                 fuelType = fuelType,
                 type = type
             )
+
             val vehicleId = vehicleRepository.addVehicle(vehicle)
+
             selectVehicle(vehicle.copy(id = vehicleId))
+            _uiState.value =
+                _uiState.value.copy(
+                    vehicleSaveSuccessful = true
+                )
         }
     }
 
@@ -88,14 +109,33 @@ class DashboardViewModel(
         type: VehicleType
     ) {
         viewModelScope.launch {
+            val formattedName = formatVehicleName(name)
+            val trimmedRegistration = registrationNumber.trim()
+            val error =
+                validateVehicle(
+                    vehicleId = vehicleId,
+                    name = formattedName,
+                    registrationNumber = trimmedRegistration
+                )
+            if (error != null) {
+                _uiState.value =
+                    _uiState.value.copy(
+                        vehicleValidationError = error
+                    )
+                return@launch
+            }
             val vehicle = Vehicle(
                 id = vehicleId,
-                name = name,
-                registrationNumber = registrationNumber,
+                name = formattedName,
+                registrationNumber = trimmedRegistration,
                 fuelType = fuelType,
                 type = type
             )
             vehicleRepository.updateVehicle(vehicle)
+            _uiState.value =
+                _uiState.value.copy(
+                    vehicleSaveSuccessful = true
+                )
         }
     }
 
@@ -159,5 +199,69 @@ class DashboardViewModel(
                     )
                 }
         }
+    }
+
+    fun clearVehicleValidationError() {
+        _uiState.value =
+            _uiState.value.copy(
+                vehicleValidationError = null
+            )
+    }
+
+    fun clearVehicleSaveSuccessful() {
+        _uiState.value =
+            _uiState.value.copy(
+                vehicleSaveSuccessful = false
+            )
+    }
+
+    private fun formatVehicleName(name: String): String {
+        return name
+            .trim()
+            .split("\\s+".toRegex())
+            .joinToString(" ") {
+                it.lowercase()
+                    .replaceFirstChar { c ->
+                        c.uppercase()
+                    }
+            }
+    }
+
+    private suspend fun validateVehicle(
+        vehicleId: Long?,
+        name: String,
+        registrationNumber: String
+    ): String? {
+
+        if (name.isBlank()) {
+            return "Vehicle name cannot be empty."
+        }
+
+        val existingName =
+            vehicleRepository.getVehicleByName(name)
+
+        if (
+            existingName != null &&
+            existingName.id != vehicleId
+        ) {
+            return "Vehicle name already exists.\n\nPlease choose a different name."
+        }
+
+        if (registrationNumber.isNotBlank()) {
+
+            val existingRegistration =
+                vehicleRepository.getVehicleByRegistration(
+                    registrationNumber
+                )
+
+            if (
+                existingRegistration != null &&
+                existingRegistration.id != vehicleId
+            ) {
+                return "Registration number already exists.\n\nPlease enter a different registration number."
+            }
+        }
+
+        return null
     }
 }

@@ -7,6 +7,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.mileagetracker.data.entity.FuelType
 import com.example.mileagetracker.data.entity.VehicleType
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,26 +32,42 @@ fun VehicleDialog(
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
-
+    var vehicleNameFocused by remember {
+        mutableStateOf(false)
+    }
     AlertDialog(
         onDismissRequest = onCancel,
 
-        title = {
-            Text(title)
-        },
+        title = { Text(title) },
 
         text = {
-
             Column {
-
                 OutlinedTextField(
                     value = vehicleName,
                     onValueChange = onVehicleNameChange,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { focusState ->
+                            if (
+                                vehicleNameFocused &&
+                                !focusState.isFocused
+                            ) {
+                                onVehicleNameChange(
+                                    vehicleName
+                                        .trim()
+                                        .split("\\s+".toRegex())
+                                        .joinToString(" ") {
+                                            it.lowercase()
+                                                .replaceFirstChar { c ->
+                                                    c.uppercase()
+                                                }
+                                        }
+                                )
+                            }
+                            vehicleNameFocused = focusState.isFocused
+                        },
                     singleLine = true,
-                    label = {
-                        Text("Vehicle Name")
-                    }
+                    label = { Text("Vehicle Name") }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))

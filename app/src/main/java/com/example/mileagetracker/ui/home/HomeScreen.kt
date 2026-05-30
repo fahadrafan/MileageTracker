@@ -43,6 +43,8 @@ import com.example.mileagetracker.data.entity.Vehicle
 import com.example.mileagetracker.data.entity.VehicleType
 import com.example.mileagetracker.ui.vehicle.VehicleDialog
 import kotlinx.coroutines.launch
+import com.example.mileagetracker.ui.vehicle.VehicleValidationDialog
+import androidx.compose.runtime.LaunchedEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +68,11 @@ fun HomeScreen(
         VehicleType
     ) -> Unit,
 
-    onDeleteVehicle: (Long) -> Unit
+    onDeleteVehicle: (Long) -> Unit,
+    vehicleValidationError: String?,
+    onClearVehicleValidationError: () -> Unit,
+    vehicleSaveSuccessful: Boolean,
+    onVehicleSaveHandled: () -> Unit,
 ) {
 
     var showDialog by remember {
@@ -115,6 +121,11 @@ fun HomeScreen(
 
     val scope = rememberCoroutineScope()
 
+    VehicleValidationDialog(
+        error = vehicleValidationError,
+        onDismiss = onClearVehicleValidationError
+    )
+
     if (showDialog) {
 
         VehicleDialog(
@@ -155,30 +166,7 @@ fun HomeScreen(
             },
 
             onSave = {
-
-                if (vehicleName.isBlank()) return@VehicleDialog
-
-                val alreadyExists =
-                    vehicles.any {
-
-                        if (isEditMode) {
-                            it.id != editingVehicleId &&
-                                    it.name.equals(
-                                        vehicleName.trim(),
-                                        ignoreCase = true
-                                    )
-                        } else {
-                            it.name.equals(
-                                vehicleName.trim(),
-                                ignoreCase = true
-                            )
-                        }
-                    }
-
-                if (alreadyExists) return@VehicleDialog
-
                 if (isEditMode) {
-
                     editingVehicleId?.let { id ->
 
                         onUpdateVehicle(
@@ -189,9 +177,7 @@ fun HomeScreen(
                             selectedType
                         )
                     }
-
                 } else {
-
                     onAddVehicle(
                         vehicleName,
                         registrationNumber,
@@ -199,16 +185,6 @@ fun HomeScreen(
                         selectedType
                     )
                 }
-
-                vehicleName = ""
-                registrationNumber = ""
-                selectedFuelType = FuelType.PETROL
-                selectedType = VehicleType.CAR
-
-                isEditMode = false
-                editingVehicleId = null
-
-                showDialog = false
             },
 
             onCancel = {
@@ -447,6 +423,25 @@ fun HomeScreen(
                     )
                 }
             }
+        }
+    }
+
+    LaunchedEffect(vehicleSaveSuccessful) {
+
+        if (vehicleSaveSuccessful) {
+
+            vehicleName = ""
+            registrationNumber = ""
+
+            selectedFuelType = FuelType.PETROL
+            selectedType = VehicleType.CAR
+
+            isEditMode = false
+            editingVehicleId = null
+
+            showDialog = false
+
+            onVehicleSaveHandled()
         }
     }
 }

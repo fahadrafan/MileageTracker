@@ -77,6 +77,10 @@ fun AppNavigation() {
             HomeScreen(
                 vehicles = uiState.vehicles,
                 mileageMap = uiState.vehicleMileageMap,
+                vehicleValidationError = uiState.vehicleValidationError,
+                onClearVehicleValidationError = {
+                    viewModel.clearVehicleValidationError()
+                },
                 onVehicleClick = { vehicleId ->
                     navController.navigate(
                         Routes.vehicleDashboard(vehicleId)
@@ -110,7 +114,13 @@ fun AppNavigation() {
                 },
                 onSettingsClick = {
                     navController.navigate("settings")
-                }
+                },
+                vehicleSaveSuccessful =
+                    uiState.vehicleSaveSuccessful,
+
+                onVehicleSaveHandled = {
+                    viewModel.clearVehicleSaveSuccessful()
+                },
             )
         }
 
