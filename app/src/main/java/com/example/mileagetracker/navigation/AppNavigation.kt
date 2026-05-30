@@ -278,6 +278,7 @@ fun AppNavigation() {
                     factory =
                         HistoryViewModelFactory(
                             app.container.fuelRepository,
+                            app.container.vehicleRepository,
                             vehicleId
                         )
                 )

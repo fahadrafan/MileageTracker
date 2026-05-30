@@ -287,8 +287,15 @@ class FuelEntryViewModel(
                 _uiState.value =
                     _uiState.value.copy(
                         chronologyError =
-                            "Conflicts with Entry #${chronologyResult.conflictEntryNumber} " +
-                                    "($dateText, ${chronologyResult.conflictOdometerKm?.toInt()} km)"
+                            """
+                            This entry conflicts with:
+                            
+                            Entry #${chronologyResult.conflictEntryNumber}
+                            $dateText
+                            ${chronologyResult.conflictOdometerKm?.toInt()} km
+
+                            Please edit or delete the conflicting entry first.
+                            """.trimIndent()
                     )
                 return@launch
             }
