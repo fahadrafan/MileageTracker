@@ -152,37 +152,6 @@ class DashboardViewModel(
         }
     }
 
-    fun preloadVehicleMileage() {
-
-        viewModelScope.launch {
-
-            _uiState.value.vehicles.forEach { vehicle ->
-
-                fuelRepository
-                    .getFuelEntriesForVehicle(vehicle.id)
-                    .collectLatest { entries ->
-
-                        val mileage =
-                            MileageCalculator
-                                .calculateStatistics(entries)
-                                .estimatedMileage
-
-                        val map =
-                            _uiState.value
-                                .vehicleMileageMap
-                                .toMutableMap()
-
-                        map[vehicle.id] = mileage
-
-                        _uiState.value =
-                            _uiState.value.copy(
-                                vehicleMileageMap = map
-                            )
-                    }
-            }
-        }
-    }
-
     private fun observeStatistics(vehicleId: Long) {
         statisticsJob?.cancel()
         statisticsJob = viewModelScope.launch {

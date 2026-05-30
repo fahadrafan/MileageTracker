@@ -122,11 +122,7 @@ fun FuelEntryScreen(
         AlertDialog(
             onDismissRequest = { },
             title = { Text("Cannot Save") },
-            text = {
-                Text(
-                    "$error\n\nPlease edit or delete the conflicting entry first."
-                )
-            },
+            text = { Text(error) },
             confirmButton = {
                 TextButton(
                     onClick = { viewModel.clearChronologyError() }
