@@ -79,6 +79,62 @@ fun FuelEntryScreen(
         }
     }
 
+    if (uiState.showSoftWarningDialog) {
+
+        AlertDialog(
+            onDismissRequest = {
+                viewModel.dismissSoftWarningDialog()
+            },
+
+            title = {
+                Text("Save Entry?")
+            },
+
+            text = {
+                Text(
+                    "This entry will be inserted between existing records.\n\nSave anyway?"
+                )
+            },
+
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.confirmSoftWarningSave(vehicleId)
+                    }
+                ) {
+                    Text("Save Anyway")
+                }
+            },
+
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.dismissSoftWarningDialog()
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    uiState.chronologyError?.let { error ->
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text("Cannot Save") },
+            text = {
+                Text(
+                    "$error\n\nPlease edit or delete the conflicting entry first."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.clearChronologyError() }
+                ) { Text("OK") }
+            }
+        )
+    }
+
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
             selectableDates = object : SelectableDates {

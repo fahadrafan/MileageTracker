@@ -268,7 +268,7 @@ fun DashboardScreen(
                         ) {
 
                             Text(
-                                text = "${uiState.selectedVehicle?.name ?: "Vehicle"}",
+                                text = uiState.selectedVehicle?.name ?: "Vehicle",
                                 style = MaterialTheme.typography.titleMedium
                             )
 

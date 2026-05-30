@@ -23,15 +23,15 @@ interface FuelEntryDao {
     SELECT * FROM fuel_entries
     WHERE id = :entryId
     LIMIT 1
-""")
+    """)
     suspend fun getEntryById(
         entryId: Long
     ): FuelEntry?
     @Query("""
     SELECT * FROM fuel_entries
     WHERE vehicleId = :vehicleId
-    ORDER BY dateMillis DESC, id DESC
-""")
+    ORDER BY odometerKm DESC, id DESC
+    """)
     fun getEntriesForVehicle(
         vehicleId: Long
     ): Flow<List<FuelEntry>>
@@ -39,8 +39,17 @@ interface FuelEntryDao {
     @Query("""
     SELECT * FROM fuel_entries
     WHERE vehicleId = :vehicleId
+    ORDER BY odometerKm ASC, id ASC
+    """)
+    suspend fun getEntriesForVehicleChronology(
+        vehicleId: Long
+    ): List<FuelEntry>
+
+    @Query("""
+    SELECT * FROM fuel_entries
+    WHERE vehicleId = :vehicleId
     ORDER BY odometerKm DESC
-""")
+    """)
     suspend fun getEntriesForVehicleList(
         vehicleId: Long
     ): List<FuelEntry>
@@ -53,7 +62,7 @@ interface FuelEntryDao {
     WHERE vehicleId = :vehicleId
     ORDER BY odometerKm DESC
     LIMIT 1
-""")
+    """)
     suspend fun getLatestEntry(
         vehicleId: Long
     ): FuelEntry?

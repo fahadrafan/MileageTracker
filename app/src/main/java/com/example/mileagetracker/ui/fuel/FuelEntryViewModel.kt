@@ -13,6 +13,8 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.mileagetracker.ui.fuel.validation.ChronologyValidationResult
+import com.example.mileagetracker.ui.fuel.validation.ValidationType
 
 class FuelEntryViewModel(
     private val fuelRepository: FuelRepository,
@@ -22,6 +24,9 @@ class FuelEntryViewModel(
     private val _uiState = MutableStateFlow(FuelEntryUiState())
     private var editingEntryId: Long? = null
     private var isEditMode = false
+    private var bypassSoftWarning = false
+    private var originalOdometerKm: Double? = null
+    private var originalDateMillis: Long? = null
 
     val uiState: StateFlow<FuelEntryUiState> = _uiState.asStateFlow()
 
@@ -89,7 +94,7 @@ class FuelEntryViewModel(
         if (text.isBlank()) {
             return
         }
-// Already formatted date?
+        // Already formatted date?
         try {
             val formatter =
                 SimpleDateFormat("dd-MMM-yy", Locale.getDefault())
@@ -152,14 +157,9 @@ class FuelEntryViewModel(
     }
 
     private fun validateOdometer(): String? {
-        val state = _uiState.value
-        if (state.odometer.isBlank()) {
-            return null
-        }
-        val lastEntry = state.lastOdometer.toDoubleOrNull() ?: return null
-        val currentEntry = state.odometer.toDoubleOrNull() ?: return null
+        val value = _uiState.value.odometer.toDoubleOrNull() ?: return null
 
-        return if (currentEntry <= lastEntry) "Current odometer must be greater than ${lastEntry.toInt()} km"
+        return if (value <= 0) "Odometer must be greater than 0"
         else null
     }
 
@@ -263,8 +263,46 @@ class FuelEntryViewModel(
                 dateError = null,
                 odometerError = null,
                 amountPaidError = null,
-                fuelPriceError = null
+                fuelPriceError = null,
+                chronologyError = null
             )
+
+            val chronologyResult =
+                validateChronology(
+                    vehicleId = vehicleId,
+                    dateMillis = parseDateMillis(state.refillDateText),
+                    odometerKm = state.odometer.toDouble()
+                )
+
+            if (chronologyResult.type == ValidationType.HARD_BLOCK) {
+                println("HARD BLOCK: ${chronologyResult.conflictEntryNumber}")
+                val dateText =
+                    chronologyResult.conflictDateMillis
+                        ?.let {
+                            SimpleDateFormat(
+                                "dd-MMM-yy",
+                                Locale.getDefault()
+                            ).format(Date(it))
+                        } ?: ""
+                _uiState.value =
+                    _uiState.value.copy(
+                        chronologyError =
+                            "Conflicts with Entry #${chronologyResult.conflictEntryNumber} " +
+                                    "($dateText, ${chronologyResult.conflictOdometerKm?.toInt()} km)"
+                    )
+                return@launch
+            }
+            if (
+                chronologyResult.type == ValidationType.SOFT_WARNING &&
+                !bypassSoftWarning
+            ) {
+                _uiState.value =
+                    _uiState.value.copy(
+                        showSoftWarningDialog = true
+                    )
+
+                return@launch
+            }
 
             val fuelEntry = FuelEntry(
                 id = editingEntryId ?: 0,
@@ -287,6 +325,7 @@ class FuelEntryViewModel(
                 state.amountPaid.toDouble(),
                 state.fuelPrice.toDouble()
             )
+            bypassSoftWarning = false
             _uiState.value = _uiState.value.copy(saveSuccessful = true)
         }
     }
@@ -329,6 +368,8 @@ class FuelEntryViewModel(
             val entry = fuelRepository.getEntryById(entryId) ?: return@launch
             isEditMode = true
             editingEntryId = entry.id
+            originalOdometerKm = entry.odometerKm
+            originalDateMillis = entry.dateMillis
             _uiState.value =
                 _uiState.value.copy(
                     refillDateText = SimpleDateFormat(
@@ -364,5 +405,120 @@ class FuelEntryViewModel(
 
     fun isEditing(): Boolean {
         return editingEntryId != null
+    }
+
+    private suspend fun validateChronology(
+        vehicleId: Long,
+        dateMillis: Long,
+        odometerKm: Double
+    ): ChronologyValidationResult {
+        val entries = fuelRepository.getEntriesForVehicleChronology(vehicleId)
+        val filteredEntries = entries.filter { it.id != editingEntryId }
+
+        val sameOdometerEntry =
+            filteredEntries.firstOrNull {
+                it.odometerKm == odometerKm
+            }
+
+        if (sameOdometerEntry != null) {
+            println("DUPLICATE ODOMETER DETECTED")
+            val entryNumber =
+                fuelRepository.getEntryNumber(
+                    vehicleId,
+                    sameOdometerEntry.id
+                )
+
+            return ChronologyValidationResult(
+                type = ValidationType.HARD_BLOCK,
+                conflictEntryId = sameOdometerEntry.id,
+                conflictEntryNumber = entryNumber,
+                conflictDateMillis = sameOdometerEntry.dateMillis,
+                conflictOdometerKm = sameOdometerEntry.odometerKm
+            )
+        }
+
+        val previousEntry = filteredEntries
+            .filter { it.odometerKm < odometerKm }
+            .maxByOrNull { it.odometerKm }
+
+        val nextEntry = filteredEntries
+            .filter { it.odometerKm > odometerKm }
+            .minByOrNull { it.odometerKm }
+        if (
+            previousEntry != null &&
+            dateMillis < previousEntry.dateMillis
+        ) {
+            val entryNumber =
+                fuelRepository.getEntryNumber(
+                    vehicleId,
+                    previousEntry.id
+                )
+            return ChronologyValidationResult(
+                conflictDateMillis = previousEntry.dateMillis,
+                conflictOdometerKm = previousEntry.odometerKm,
+                type = ValidationType.HARD_BLOCK,
+                conflictEntryId = previousEntry.id,
+                conflictEntryNumber = entryNumber
+            )
+        }
+
+        if (
+            nextEntry != null &&
+            dateMillis > nextEntry.dateMillis
+        ) {
+            val entryNumber =
+                fuelRepository.getEntryNumber(
+                    vehicleId,
+                    nextEntry.id
+                )
+            return ChronologyValidationResult(
+                conflictDateMillis = nextEntry.dateMillis,
+                conflictOdometerKm = nextEntry.odometerKm,
+                type = ValidationType.HARD_BLOCK,
+                conflictEntryId = nextEntry.id,
+                conflictEntryNumber = entryNumber
+            )
+        }
+
+        if (editingEntryId == null) {
+
+            val highestOdometer =
+                filteredEntries.maxOfOrNull {
+                    it.odometerKm
+                }
+
+            if (
+                highestOdometer != null &&
+                odometerKm < highestOdometer
+            ) {
+                return ChronologyValidationResult(
+                    type = ValidationType.SOFT_WARNING
+                )
+            }
+        }
+
+        return ChronologyValidationResult(type = ValidationType.VALID)
+    }
+
+    fun clearChronologyError() {
+        _uiState.value =
+            _uiState.value.copy(
+                chronologyError = null
+            )
+    }
+
+    fun dismissSoftWarningDialog() {
+        _uiState.value =
+            _uiState.value.copy(
+                showSoftWarningDialog = false
+            )
+    }
+
+    fun confirmSoftWarningSave(
+        vehicleId: Long
+    ) {
+        bypassSoftWarning = true
+        dismissSoftWarningDialog()
+        saveFuel(vehicleId)
     }
 }

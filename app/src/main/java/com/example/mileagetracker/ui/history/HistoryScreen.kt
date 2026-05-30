@@ -30,6 +30,7 @@ import com.example.mileagetracker.data.preferences.model.FuelUnit
 import com.example.mileagetracker.utils.formatCurrency
 import com.example.mileagetracker.utils.formatDistance
 import com.example.mileagetracker.utils.formatFuel
+import androidx.compose.foundation.lazy.itemsIndexed
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -136,18 +137,16 @@ fun HistoryScreen(
                     .padding(padding),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(entries) { entry ->
+                itemsIndexed(entries) { index, entry ->
+                    val entryNumber = entries.size - index
                     FuelEntryCard(
+                        entryNumber = entryNumber,
                         entry = entry,
                         distanceUnit = distanceUnit,
                         fuelUnit = fuelUnit,
                         currency = currency,
-                        onEditClick = {
-                            onEditEntry(entry)
-                        },
-                        onDeleteClick = {
-                            entryToDelete = entry
-                        }
+                        onEditClick = { onEditEntry(entry) },
+                        onDeleteClick = { entryToDelete = entry }
                     )
                 }
             }
@@ -157,6 +156,7 @@ fun HistoryScreen(
 
 @Composable
 private fun FuelEntryCard(
+    entryNumber: Int,
     entry: FuelEntry,
     distanceUnit: DistanceUnit,
     fuelUnit: FuelUnit,
@@ -177,10 +177,16 @@ private fun FuelEntryCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = formatDate(entry.dateMillis),
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Column {
+                    Text(
+                        text = "Entry #$entryNumber",
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                    Text(
+                        text = formatDate(entry.dateMillis),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 Box {
 

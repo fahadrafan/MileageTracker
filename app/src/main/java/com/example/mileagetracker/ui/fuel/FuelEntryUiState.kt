@@ -14,5 +14,7 @@ data class FuelEntryUiState(
     val odometerError: String? = null,
     val fuelQuantityError: String? = null,
     val amountPaidError: String? = null,
-    val fuelPriceError: String? = null
+    val fuelPriceError: String? = null,
+    val chronologyError: String? = null,
+    val showSoftWarningDialog: Boolean = false
 )

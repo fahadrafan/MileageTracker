@@ -13,6 +13,7 @@ class FuelRepository(
     ): List<FuelEntry> {
         return fuelEntryDao.getEntriesForVehicleList(vehicleId)
     }
+
     suspend fun addFuelEntry(fuelEntry: FuelEntry) {
         fuelEntryDao.insert(fuelEntry)
     }
@@ -35,5 +36,19 @@ class FuelRepository(
 
     suspend fun deleteEntry(entryId: Long) {
         fuelEntryDao.deleteEntry(entryId)
+    }
+
+    suspend fun getEntriesForVehicleChronology(vehicleId: Long): List<FuelEntry> {
+        return fuelEntryDao.getEntriesForVehicleChronology(vehicleId)
+    }
+
+    suspend fun getEntryNumber(
+        vehicleId: Long,
+        entryId: Long
+    ): Int {
+        val entries = getEntriesForVehicleChronology(vehicleId)
+        val index = entries.indexOfFirst { it.id == entryId }
+        return if (index >= 0) index + 1
+        else -1
     }
 }
