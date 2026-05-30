@@ -283,6 +283,11 @@ fun AppNavigation() {
                             entryId = entry.id
                         )
                     )
+                },
+                onAddFuel = {
+                    navController.navigate(
+                        Routes.addFuel(vehicleId)
+                    )
                 }
             )
         }

@@ -31,13 +31,15 @@ import com.example.mileagetracker.utils.formatCurrency
 import com.example.mileagetracker.utils.formatDistance
 import com.example.mileagetracker.utils.formatFuel
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.ExtendedFloatingActionButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     viewModel: HistoryViewModel,
     onBack: () -> Unit,
-    onEditEntry: (FuelEntry) -> Unit
+    onEditEntry: (FuelEntry) -> Unit,
+    onAddFuel: () -> Unit
 ) {
     val entries by viewModel.entries.collectAsState()
 
@@ -119,6 +121,13 @@ fun HistoryScreen(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAddFuel
+            ) {
+                Text("+")
+            }
         }
     ) { padding ->
         if (entries.isEmpty()) {
