@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.map
 import com.example.mileagetracker.data.preferences.model.Currency
 import com.example.mileagetracker.data.preferences.model.DistanceUnit
 import com.example.mileagetracker.data.preferences.model.FuelUnit
+import kotlinx.coroutines.flow.first
 
 class UserPreferencesRepository(
     private val context: Context
@@ -101,4 +102,29 @@ class UserPreferencesRepository(
         }
     }
 
+    suspend fun getSettingsSnapshot(): AppSettings {
+        return AppSettings(
+            themeMode = themeMode.first(),
+            distanceUnit = distanceUnit.first(),
+            fuelUnit = fuelUnit.first(),
+            currency = currency.first()
+        )
+    }
+
+    suspend fun restoreSettings(settings: AppSettings) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.THEME_MODE] = settings.themeMode.name
+            preferences[PreferenceKeys.DISTANCE_UNIT] = settings.distanceUnit.name
+            preferences[PreferenceKeys.FUEL_UNIT] = settings.fuelUnit.name
+            preferences[PreferenceKeys.CURRENCY] = settings.currency.name
+        }
+    }
+
 }
+
+data class AppSettings(
+    val themeMode: ThemeMode,
+    val distanceUnit: DistanceUnit,
+    val fuelUnit: FuelUnit,
+    val currency: Currency
+)

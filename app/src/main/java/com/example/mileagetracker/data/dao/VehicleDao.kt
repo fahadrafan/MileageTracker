@@ -14,14 +14,23 @@ interface VehicleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(vehicle: Vehicle): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(vehicles: List<Vehicle>)
+
     @Query("SELECT * FROM vehicles ORDER BY name")
     fun getAllVehicles(): Flow<List<Vehicle>>
+
+    @Query("SELECT * FROM vehicles ORDER BY id")
+    suspend fun getAllVehiclesList(): List<Vehicle>
 
     @Query("SELECT * FROM vehicles WHERE id = :id")
     suspend fun getVehicleById(id: Long): Vehicle?
 
     @Query("DELETE FROM vehicles WHERE id = :id")
     suspend fun deleteVehicle(id: Long)
+
+    @Query("DELETE FROM vehicles")
+    suspend fun deleteAllVehicles()
 
     @Query("SELECT COUNT(*) FROM vehicles")
     suspend fun getVehicleCount(): Int

@@ -18,6 +18,14 @@ class FuelRepository(
         fuelEntryDao.insert(fuelEntry)
     }
 
+    suspend fun addFuelEntries(entries: List<FuelEntry>) {
+        fuelEntryDao.insertAll(entries)
+    }
+
+    suspend fun getAllEntriesList(): List<FuelEntry> {
+        return fuelEntryDao.getAllEntriesList()
+    }
+
     suspend fun updateEntry(entry: FuelEntry) {
         fuelEntryDao.updateEntry(entry)
     }
@@ -36,6 +44,10 @@ class FuelRepository(
 
     suspend fun deleteEntry(entryId: Long) {
         fuelEntryDao.deleteEntry(entryId)
+    }
+
+    suspend fun deleteAllEntries() {
+        fuelEntryDao.deleteAllEntries()
     }
 
     suspend fun getEntriesForVehicleChronology(vehicleId: Long): List<FuelEntry> {

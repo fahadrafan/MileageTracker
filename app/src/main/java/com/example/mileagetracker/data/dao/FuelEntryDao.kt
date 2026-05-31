@@ -14,6 +14,9 @@ interface FuelEntryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entry: FuelEntry)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(entries: List<FuelEntry>)
+
     @Update
     suspend fun updateEntry(
         entry: FuelEntry
@@ -56,6 +59,12 @@ interface FuelEntryDao {
 
     @Query("DELETE FROM fuel_entries WHERE id = :id")
     suspend fun deleteEntry(id: Long)
+
+    @Query("DELETE FROM fuel_entries")
+    suspend fun deleteAllEntries()
+
+    @Query("SELECT * FROM fuel_entries ORDER BY vehicleId, odometerKm, id")
+    suspend fun getAllEntriesList(): List<FuelEntry>
 
     @Query("""
     SELECT * FROM fuel_entries

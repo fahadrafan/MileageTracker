@@ -18,10 +18,22 @@ class VehicleRepository(
         return vehicleDao.insert(vehicle)
     }
 
+    suspend fun addVehicles(vehicles: List<Vehicle>) {
+        vehicleDao.insertAll(vehicles)
+    }
+
+    suspend fun getAllVehiclesList(): List<Vehicle> {
+        return vehicleDao.getAllVehiclesList()
+    }
+
     suspend fun deleteVehicle(
         vehicleId: Long
     ) {
         vehicleDao.deleteVehicle(vehicleId)
+    }
+
+    suspend fun deleteAllVehicles() {
+        vehicleDao.deleteAllVehicles()
     }
 
     suspend fun getVehicleById(id: Long): Vehicle? {
