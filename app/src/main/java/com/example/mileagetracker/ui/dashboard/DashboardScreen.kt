@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -412,7 +413,34 @@ fun DashboardScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Spacer(modifier = Modifier.height(12.dp))
                         if (uiState.recentEntries.isEmpty()) {
-                            Text("No fuel entries yet")
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.LocalGasStation,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(44.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Text(
+                                    text = "No fuel entries yet",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+
+                                Spacer(modifier = Modifier.height(6.dp))
+
+                                Text(
+                                    text = "Tap + to log your first fill",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         } else {
                             uiState.recentEntries.forEach { entry ->
                                 Row(modifier = Modifier.fillMaxWidth()) {

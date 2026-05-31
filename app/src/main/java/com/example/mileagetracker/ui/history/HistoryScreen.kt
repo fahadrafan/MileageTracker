@@ -18,6 +18,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.LocalGasStation
 import com.example.mileagetracker.data.entity.FuelEntry
 import java.text.SimpleDateFormat
 import java.util.*
@@ -131,13 +132,58 @@ fun HistoryScreen(
         }
     ) { padding ->
         if (entries.isEmpty()) {
-            Box(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
+                    .padding(padding)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("No fuel entries found")
+                item {
+                    Spacer(
+                        modifier = Modifier.height(4.dp)
+                    )
+                }
+
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocalGasStation,
+                                contentDescription = null,
+                                modifier = Modifier.size(56.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(16.dp)
+                            )
+
+                            Text(
+                                text = "No fuel entries yet",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(8.dp)
+                            )
+
+                            Text(
+                                text = "Tap + to log your first fuel fill",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
             }
         } else {
             LazyColumn(
