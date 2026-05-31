@@ -3,6 +3,8 @@ package com.example.mileagetracker.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.mileagetracker.backup.BackupManager
+import com.example.mileagetracker.backup.RestoreManager
 import com.example.mileagetracker.data.preferences.UserPreferencesRepository
 import com.example.mileagetracker.data.preferences.model.ThemeMode
 import kotlinx.coroutines.flow.SharingStarted
@@ -13,7 +15,9 @@ import com.example.mileagetracker.data.preferences.model.DistanceUnit
 import com.example.mileagetracker.data.preferences.model.FuelUnit
 
 class SettingsViewModel(
-    private val preferencesRepository: UserPreferencesRepository
+    private val preferencesRepository: UserPreferencesRepository,
+    private val backupManager: BackupManager? = null,
+    private val restoreManager: RestoreManager? = null
 ) : ViewModel() {
 
     val themeMode =
@@ -74,10 +78,24 @@ class SettingsViewModel(
             preferencesRepository.setCurrency(currency)
         }
     }
+
+    suspend fun exportBackupJson(): String {
+        return requireNotNull(backupManager).exportJson()
+    }
+
+    suspend fun exportBackupCsv(): String {
+        return requireNotNull(backupManager).exportCsv()
+    }
+
+    suspend fun restoreBackupJson(jsonText: String) {
+        requireNotNull(restoreManager).restore(jsonText)
+    }
 }
 
 class SettingsViewModelFactory(
-    private val repository: UserPreferencesRepository
+    private val repository: UserPreferencesRepository,
+    private val backupManager: BackupManager? = null,
+    private val restoreManager: RestoreManager? = null
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -86,7 +104,11 @@ class SettingsViewModelFactory(
     ): T {
 
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
-            return SettingsViewModel(repository) as T
+            return SettingsViewModel(
+                repository,
+                backupManager,
+                restoreManager
+            ) as T
         }
 
         throw IllegalArgumentException(

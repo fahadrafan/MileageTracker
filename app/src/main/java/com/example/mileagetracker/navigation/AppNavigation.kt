@@ -127,10 +127,13 @@ fun AppNavigation() {
         composable("settings") {
 
             val context = LocalContext.current
+            val app = context.applicationContext as FuelGarageApplication
 
             val viewModel: SettingsViewModel = viewModel(
                 factory = SettingsViewModelFactory(
-                    UserPreferencesRepository(context)
+                    app.container.preferencesRepository,
+                    app.container.backupManager,
+                    app.container.restoreManager
                 )
             )
 
