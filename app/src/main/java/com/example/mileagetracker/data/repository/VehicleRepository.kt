@@ -44,4 +44,12 @@ class VehicleRepository(
     suspend fun updateVehicle(vehicle: Vehicle) {
         vehicleDao.updateVehicle(vehicle)
     }
+
+    suspend fun getVehicleByName(name: String): Vehicle? {
+        return vehicleDao.getVehicleByName(name)
+    }
+
+    suspend fun getVehicleByRegistration(registrationNumber: String): Vehicle? {
+        return vehicleDao.getVehicleByRegistration(registrationNumber)
+    }
 }

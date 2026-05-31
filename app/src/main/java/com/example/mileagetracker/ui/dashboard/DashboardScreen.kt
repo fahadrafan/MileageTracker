@@ -15,36 +15,64 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import com.example.mileagetracker.ui.vehicle.VehicleDialog
+import com.example.mileagetracker.data.entity.FuelType
+import com.example.mileagetracker.data.entity.VehicleType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import com.example.mileagetracker.data.entity.VehicleType
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.mileagetracker.data.preferences.UserPreferencesRepository
+import com.example.mileagetracker.data.preferences.model.Currency
+import com.example.mileagetracker.data.preferences.model.DistanceUnit
+import com.example.mileagetracker.data.preferences.model.FuelUnit
+import com.example.mileagetracker.utils.formatCurrency
+import com.example.mileagetracker.utils.formatDistance
+import com.example.mileagetracker.utils.formatFuel
+import com.example.mileagetracker.utils.formatMileage
+import com.example.mileagetracker.ui.vehicle.VehicleValidationDialog
+import androidx.compose.runtime.LaunchedEffect
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel,
     onAddFuelClick: () -> Unit,
-    onHistoryClick: () -> Unit
+    onHistoryClick: () -> Unit,
+    onVehicleDeleted: () -> Unit,
+    onBack: () -> Unit
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
     val stats = uiState.statistics
+    val context = LocalContext.current
+
+    val preferencesRepository = remember {
+        UserPreferencesRepository(context)
+    }
+
+    val distanceUnit by preferencesRepository
+        .distanceUnit
+        .collectAsStateWithLifecycle(
+            initialValue = DistanceUnit.KM
+        )
+
+    val fuelUnit by preferencesRepository
+        .fuelUnit
+        .collectAsStateWithLifecycle(
+            initialValue = FuelUnit.LITRES
+        )
+
+    val currency by preferencesRepository
+        .currency
+        .collectAsStateWithLifecycle(
+            initialValue = Currency.INR
+        )
 
     var showDialog by remember {
-        mutableStateOf(false)
-    }
-
-    var showDeleteDialog by remember {
-        mutableStateOf(false)
-    }
-
-    var showVehicleSelector by remember {
-        mutableStateOf(false)
-    }
-
-    var isEditVehicle by remember {
         mutableStateOf(false)
     }
 
@@ -60,108 +88,89 @@ fun DashboardScreen(
         mutableStateOf(VehicleType.CAR)
     }
 
-    if (showVehicleSelector) {
-        AlertDialog(
-            onDismissRequest = { showVehicleSelector = false },
-            title = { Text("Select Vehicle") },
-            text = {
-                Column {
-                    uiState.vehicles.forEach { vehicle ->
-                        TextButton(
-                            onClick = {
-                                viewModel.selectVehicle(vehicle)
-                                showVehicleSelector = false
-                            }
-                        ) {
-                            val icon =
-                                if (vehicle.type.name == "CAR") "🚗"
-                                else "🏍"
-                            Text("$icon ${vehicle.name}")
-                        }
-                    }
-                }
-            },
-            confirmButton = {}
-        )
+    var registrationNumber by remember {
+        mutableStateOf("")
     }
+
+    var selectedFuelType by remember {
+        mutableStateOf(FuelType.PETROL)
+    }
+
+    var fuelTypeExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    var vehicleTypeExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    var isEditVehicle by remember {
+        mutableStateOf(true)
+    }
+
+
+    var showDeleteDialog by remember {
+        mutableStateOf(false)
+    }
+
+    VehicleValidationDialog(
+        error = uiState.vehicleValidationError,
+        onDismiss = {
+            viewModel.clearVehicleValidationError()
+        }
+    )
 
     if (showDialog) {
 
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = {
-                Text(
-                    if (isEditVehicle) "Edit Vehicle"
-                    else "Add Vehicle"
-                )
+        VehicleDialog(
+            title = "Edit Vehicle",
+
+            vehicleName = vehicleName,
+            registrationNumber = registrationNumber,
+            selectedFuelType = selectedFuelType,
+            selectedType = selectedType,
+
+            fuelTypeExpanded = fuelTypeExpanded,
+            vehicleTypeExpanded = vehicleTypeExpanded,
+
+            onVehicleNameChange = {
+                vehicleName = it
             },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = vehicleName,
-                        onValueChange = { vehicleName = it },
-                        label = { Text("Vehicle Name") }
+
+            onRegistrationChange = {
+                registrationNumber = it
+            },
+
+            onFuelTypeChange = {
+                selectedFuelType = it
+            },
+
+            onVehicleTypeChange = {
+                selectedType = it
+            },
+
+            onFuelExpandedChange = {
+                fuelTypeExpanded = it
+            },
+
+            onVehicleExpandedChange = {
+                vehicleTypeExpanded = it
+            },
+
+            onSave = {
+                editingVehicleId?.let { id ->
+                    viewModel.updateVehicle(
+                        vehicleId = id,
+                        name = vehicleName,
+                        registrationNumber = registrationNumber,
+                        fuelType = selectedFuelType,
+                        type = selectedType
                     )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(
-                            selected = selectedType == VehicleType.CAR,
-                            onClick = { selectedType = VehicleType.CAR }
-                        )
-                        Text("Car")
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(
-                            selected = selectedType == VehicleType.BIKE,
-                            onClick = { selectedType = VehicleType.BIKE }
-                        )
-                        Text("Bike")
-                    }
                 }
             },
 
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (vehicleName.isNotBlank()) {
-                            if (isEditVehicle) {
-                                editingVehicleId?.let { id ->
-                                    viewModel.updateVehicle(
-                                        vehicleId = id,
-                                        name = vehicleName,
-                                        type = selectedType
-                                    )
-                                }
-                            } else {
-                                viewModel.addVehicle(
-                                    vehicleName,
-                                    selectedType
-                                )
-                            }
-                            vehicleName = ""
-                            selectedType = VehicleType.CAR
-                            editingVehicleId = null
-                            isEditVehicle = false
-                            showDialog = false
-                        }
-                    }
-                ) {
-                    Text("Save")
-                }
-            },
-
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        editingVehicleId = null
-                        isEditVehicle = false
-                        showDialog = false
-                    }
-                ) {
-                    Text("Cancel")
-                }
+            onCancel = {
+                showDialog = false
             }
         )
     }
@@ -193,6 +202,7 @@ fun DashboardScreen(
                     onClick = {
                         vehicle?.let { viewModel.deleteVehicle(it.id) }
                         showDeleteDialog = false
+                        onVehicleDeleted()
                     }
                 ) {
                     Text("Delete")
@@ -210,6 +220,25 @@ fun DashboardScreen(
     }
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        uiState.selectedVehicle?.name ?: "Dashboard"
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBack
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddFuelClick
@@ -226,17 +255,6 @@ fun DashboardScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item {
-
-                Button(
-                    onClick = {
-                        showDialog = true
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Add Vehicle")
-                }
-            }
 
             item {
 
@@ -252,25 +270,10 @@ fun DashboardScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
 
-                            TextButton(
-                                onClick = {
-                                    showVehicleSelector = true
-                                }
-                            ) {
-
-                                val vehicle =
-                                    uiState.selectedVehicle
-
-                                val icon =
-                                    if (
-                                        vehicle?.type?.name == "CAR"
-                                    ) "🚗"
-                                    else "🏍"
-
-                                Text(
-                                    "$icon ${vehicle?.name ?: "No Vehicle"} ▼"
-                                )
-                            }
+                            Text(
+                                text = uiState.selectedVehicle?.name ?: "Vehicle",
+                                style = MaterialTheme.typography.titleMedium
+                            )
 
                             Spacer(
                                 modifier = Modifier.weight(1f)
@@ -282,6 +285,8 @@ fun DashboardScreen(
                                         uiState.selectedVehicle?.let { vehicle ->
                                             editingVehicleId = vehicle.id
                                             vehicleName = vehicle.name
+                                            registrationNumber = vehicle.registrationNumber
+                                            selectedFuelType = vehicle.fuelType
                                             selectedType = vehicle.type
                                             isEditVehicle = true
                                             showDialog = true
@@ -308,7 +313,10 @@ fun DashboardScreen(
                         )
 
                         Text(
-                            text = "%.1f km/l".format(stats.estimatedMileage),
+                            text = formatMileage(
+                                stats.estimatedMileage,
+                                distanceUnit
+                            ),
                             style = MaterialTheme.typography.displaySmall
                         )
 
@@ -326,12 +334,18 @@ fun DashboardScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StatCard(
                         title = "Average Mileage",
-                        value = "%.1f km/l".format(stats.averageVerifiedMileage),
+                        value = formatMileage(
+                            stats.averageVerifiedMileage,
+                            distanceUnit
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
                         title = "Cost/km",
-                        value = "₹%.2f".format(stats.costPerKm),
+                        value = formatCurrency(
+                            stats.costPerKm,
+                            currency
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -341,12 +355,18 @@ fun DashboardScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StatCard(
                         title = "Distance Covered",
-                        value = "%.0f km".format(stats.totalDistance),
+                        value = formatDistance(
+                            stats.totalDistance,
+                            distanceUnit
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
                         title = "Total Fuel",
-                        value = "%.1f L".format(stats.fuelConsumed),
+                        value = formatFuel(
+                            stats.fuelConsumed,
+                            fuelUnit
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -356,12 +376,18 @@ fun DashboardScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StatCard(
                         title = "Total Spent",
-                        value = "₹%.0f".format(stats.totalSpent),
+                        value = formatCurrency(
+                            stats.totalSpent,
+                            currency
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
                         title = "Last Verified",
-                        value = "%.1f km/l".format(stats.lastVerifiedMileage),
+                        value = formatMileage(
+                            stats.lastVerifiedMileage,
+                            distanceUnit
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -395,11 +421,17 @@ fun DashboardScreen(
                                         modifier = Modifier.weight(1f)
                                     )
                                     Text(
-                                        text = "₹%.0f".format(entry.amountPaid),
+                                        text = formatCurrency(
+                                            entry.amountPaid,
+                                            currency
+                                        ),
                                         modifier = Modifier.weight(1f)
                                     )
                                     Text(
-                                        text = "%.1f L".format(entry.litres)
+                                        text = formatFuel(
+                                            entry.fuelQuantity,
+                                            fuelUnit
+                                        )
                                     )
                                 }
                                 if (entry != uiState.recentEntries.last()) {
@@ -410,6 +442,15 @@ fun DashboardScreen(
                     }
                 }
             }
+        }
+    }
+    LaunchedEffect(uiState.vehicleSaveSuccessful) {
+
+        if (uiState.vehicleSaveSuccessful) {
+
+            showDialog = false
+
+            viewModel.clearVehicleSaveSuccessful()
         }
     }
 }

@@ -24,18 +24,49 @@ import androidx.compose.material3.SelectableDates
 import java.time.Instant
 import java.time.ZoneId
 import java.time.LocalDate
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.mileagetracker.data.preferences.UserPreferencesRepository
+import com.example.mileagetracker.data.preferences.model.Currency
+import com.example.mileagetracker.data.preferences.model.DistanceUnit
+import com.example.mileagetracker.data.preferences.model.FuelUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddFuelScreen(
-    viewModel: AddFuelViewModel,
+fun FuelEntryScreen(
+    viewModel: FuelEntryViewModel,
     vehicleId: Long,
     isEditMode: Boolean = false,
     onBack: () -> Unit
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
+
     var showDatePicker by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+
+    val preferencesRepository = remember {
+        UserPreferencesRepository(context)
+    }
+
+    val distanceUnit by preferencesRepository
+        .distanceUnit
+        .collectAsStateWithLifecycle(
+            initialValue = DistanceUnit.KM
+        )
+
+    val fuelUnit by preferencesRepository
+        .fuelUnit
+        .collectAsStateWithLifecycle(
+            initialValue = FuelUnit.LITRES
+        )
+
+    val currency by preferencesRepository
+        .currency
+        .collectAsStateWithLifecycle(
+            initialValue = Currency.INR
+        )
 
     LaunchedEffect(vehicleId) {
         if (!isEditMode) {
@@ -46,6 +77,58 @@ fun AddFuelScreen(
         if (uiState.saveSuccessful) {
             onBack()
         }
+    }
+
+    if (uiState.showSoftWarningDialog) {
+
+        AlertDialog(
+            onDismissRequest = {
+                viewModel.dismissSoftWarningDialog()
+            },
+
+            title = {
+                Text("Save Entry?")
+            },
+
+            text = {
+                Text(
+                    "This entry will be inserted between existing records.\n\nSave anyway?"
+                )
+            },
+
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.confirmSoftWarningSave(vehicleId)
+                    }
+                ) {
+                    Text("Save Anyway")
+                }
+            },
+
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.dismissSoftWarningDialog()
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    uiState.chronologyError?.let { error ->
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text("Cannot Save") },
+            text = { Text(error) },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.clearChronologyError() }
+                ) { Text("OK") }
+            }
+        )
     }
 
     if (showDatePicker) {
@@ -110,7 +193,9 @@ fun AddFuelScreen(
 
             OutlinedTextField(
                 value = uiState.refillDateText,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 onValueChange = { viewModel.updateDateText(it) },
+                isError = uiState.dateError != null,
                 label = { Text("Refill Date") },
                 trailingIcon = {
                     IconButton(
@@ -132,26 +217,51 @@ fun AddFuelScreen(
                         }
                     }
             )
-
-            OutlinedTextField(
-                value = uiState.odometer,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                onValueChange = { viewModel.updateOdometer(it) },
-                label = { Text("Odometer Reading") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            if (uiState.lastOdometer.isNotBlank()) {
+            uiState.dateError?.let {
                 Text(
-                    text = "Last Reading: ${uiState.lastOdometer} km",
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
 
-            uiState.errorMessage?.let {
+            OutlinedTextField(
+                value = uiState.odometer,
+                onValueChange = { viewModel.updateOdometer(it) },
+                isError = uiState.odometerError != null,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                label = {
+                    Text(
+                        "Odometer Reading (${
+                            if (distanceUnit == DistanceUnit.MILES) "mi"
+                            else "km"
+                        })"
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged {
+                        if (!it.isFocused) {
+                            viewModel.onOdometerFocusLost()
+                        }
+                    }
+
+            )
+            uiState.odometerError?.let {
                 Text(
                     text = it,
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            if (uiState.lastOdometer.isNotBlank()) {
+                Text(
+                    text =
+                        "Last Reading: ${uiState.lastOdometer} ${
+                            if (distanceUnit == DistanceUnit.MILES) "mi"
+                            else "km"
+                        }",
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
 
@@ -162,34 +272,56 @@ fun AddFuelScreen(
                         keyboardType =
                             KeyboardType.Decimal
                     ),
-                onValueChange = {
-                    viewModel.updateAmountPaid(it)
-                },
-                label = { Text("Amount Paid (₹)") },
+                onValueChange = { viewModel.updateAmountPaid(it) },
+                isError = uiState.amountPaidError != null,
+                label = { Text("Amount Paid (${currency.symbol})") },
                 modifier = Modifier.fillMaxWidth()
             )
+            uiState.amountPaidError?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
 
             OutlinedTextField(
                 value = uiState.fuelPrice,
-                onValueChange = {
-                    viewModel.updateFuelPrice(it)
-                },
+                onValueChange = { viewModel.updateFuelPrice(it) },
+                isError = uiState.fuelPriceError != null,
                 keyboardOptions =
                     KeyboardOptions(
                         keyboardType =
                             KeyboardType.Decimal
                     ),
                 label = {
-                    Text("Fuel Price (₹/L)")
+                    Text(
+                        "Fuel Price (${currency.symbol}/${
+                            if (fuelUnit == FuelUnit.GALLONS) "gal"
+                            else "L"
+                        })"
+                    )
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+            uiState.fuelPriceError?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
 
             OutlinedTextField(
-                value = uiState.litres,
+                value = uiState.fuelQuantity,
                 onValueChange = {},
                 label = {
-                    Text("Litres")
+                    Text(
+                        "Fuel Quantity (${
+                            if (fuelUnit == FuelUnit.GALLONS) "Gallons"
+                            else "Litres"
+                        }) - Auto Calculated"
+                    )
                 },
                 enabled = false,
                 modifier = Modifier.fillMaxWidth()

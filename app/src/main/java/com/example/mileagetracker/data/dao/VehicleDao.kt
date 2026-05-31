@@ -31,7 +31,7 @@ interface VehicleDao {
     SET lastAmountPaid = :amountPaid,
         lastFuelPrice = :fuelPrice
     WHERE id = :vehicleId
-""")
+    """)
     suspend fun updateFuelDefaults(
         vehicleId: Long,
         amountPaid: Double,
@@ -40,4 +40,27 @@ interface VehicleDao {
 
     @Update
     suspend fun updateVehicle(vehicle: Vehicle)
+
+    @Query(
+        """
+    SELECT * FROM vehicles
+    WHERE LOWER(TRIM(name)) = LOWER(TRIM(:name))
+    LIMIT 1
+    """
+    )
+    suspend fun getVehicleByName(
+        name: String
+    ): Vehicle?
+
+    @Query(
+        """
+    SELECT * FROM vehicles
+    WHERE UPPER(TRIM(registrationNumber)) =
+          UPPER(TRIM(:registrationNumber))
+    LIMIT 1
+    """
+    )
+    suspend fun getVehicleByRegistration(
+        registrationNumber: String
+    ): Vehicle?
 }

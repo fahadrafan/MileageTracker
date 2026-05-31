@@ -1,26 +1,41 @@
 package com.example.mileagetracker.navigation
 
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.navigation.compose.*
-import com.example.mileagetracker.ui.dashboard.DashboardScreen
-import com.example.mileagetracker.ui.fuel.AddFuelScreen
-import com.example.mileagetracker.ui.history.HistoryScreen
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.mileagetracker.FuelGarageApplication
+import com.example.mileagetracker.data.preferences.UserPreferencesRepository
+import com.example.mileagetracker.ui.dashboard.DashboardScreen
 import com.example.mileagetracker.ui.dashboard.DashboardViewModel
 import com.example.mileagetracker.ui.dashboard.DashboardViewModelFactory
-import com.example.mileagetracker.ui.fuel.AddFuelViewModel
-import com.example.mileagetracker.ui.fuel.AddFuelViewModelFactory
+import com.example.mileagetracker.ui.fuel.FuelEntryScreen
+import com.example.mileagetracker.ui.fuel.FuelEntryViewModel
+import com.example.mileagetracker.ui.fuel.FuelEntryViewModelFactory
+import com.example.mileagetracker.ui.history.HistoryScreen
 import com.example.mileagetracker.ui.history.HistoryViewModel
 import com.example.mileagetracker.ui.history.HistoryViewModelFactory
+import com.example.mileagetracker.ui.home.HomeScreen
+import com.example.mileagetracker.ui.settings.SettingsScreen
+import com.example.mileagetracker.ui.settings.SettingsViewModel
+import com.example.mileagetracker.ui.settings.SettingsViewModelFactory
 
 object Routes {
-    const val DASHBOARD = "dashboard"
+    const val HOME = "home"
+    const val SETTINGS = "settings"
+    const val VEHICLE_DASHBOARD = "vehicle_dashboard/{vehicleId}"
     const val ADD_FUEL = "add_fuel/{vehicleId}"
     const val HISTORY = "history/{vehicleId}"
     const val EDIT_FUEL = "edit_fuel/{vehicleId}/{entryId}"
+
+    fun vehicleDashboard(vehicleId: Long): String {
+        return "vehicle_dashboard/$vehicleId"
+    }
     fun addFuel(vehicleId: Long): String {
         return "add_fuel/$vehicleId"
     }
@@ -42,12 +57,12 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.DASHBOARD
+        startDestination = Routes.HOME
     ) {
 
-        composable(Routes.DASHBOARD) {
-            val context = LocalContext.current
+        composable(Routes.HOME) {
 
+            val context = LocalContext.current
             val app = context.applicationContext as FuelGarageApplication
 
             val viewModel = viewModel<DashboardViewModel>(
@@ -57,23 +72,126 @@ fun AppNavigation() {
                 )
             )
 
+            val uiState by viewModel.uiState.collectAsState()
+
+            HomeScreen(
+                vehicles = uiState.vehicles,
+                mileageMap = uiState.vehicleMileageMap,
+                vehicleValidationError = uiState.vehicleValidationError,
+                onClearVehicleValidationError = {
+                    viewModel.clearVehicleValidationError()
+                },
+                onVehicleClick = { vehicleId ->
+                    navController.navigate(
+                        Routes.vehicleDashboard(vehicleId)
+                    )
+                },
+                onAddVehicle = { name, registrationNumber, fuelType, type ->
+                    viewModel.addVehicle(
+                        name = name,
+                        registrationNumber = registrationNumber,
+                        fuelType = fuelType,
+                        type = type
+                    )
+                },
+                onUpdateVehicle = {
+                        id,
+                        name,
+                        registrationNumber,
+                        fuelType,
+                        type ->
+
+                    viewModel.updateVehicle(
+                        vehicleId = id,
+                        name = name,
+                        registrationNumber = registrationNumber,
+                        fuelType = fuelType,
+                        type = type
+                    )
+                },
+                onDeleteVehicle = { vehicleId ->
+                    viewModel.deleteVehicle(vehicleId)
+                },
+                onSettingsClick = {
+                    navController.navigate("settings")
+                },
+                vehicleSaveSuccessful =
+                    uiState.vehicleSaveSuccessful,
+
+                onVehicleSaveHandled = {
+                    viewModel.clearVehicleSaveSuccessful()
+                },
+            )
+        }
+
+        composable("settings") {
+
+            val context = LocalContext.current
+
+            val viewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModelFactory(
+                    UserPreferencesRepository(context)
+                )
+            )
+
+            SettingsScreen(
+                viewModel = viewModel,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(
+            route = Routes.VEHICLE_DASHBOARD
+        ) { backStackEntry ->
+
+            val vehicleId =
+                backStackEntry.arguments
+                    ?.getString("vehicleId")
+                    ?.toLongOrNull()
+                    ?: return@composable
+
+            val context = LocalContext.current
+            val app = context.applicationContext as FuelGarageApplication
+
+            val viewModel = viewModel<DashboardViewModel>(
+                factory = DashboardViewModelFactory(
+                    app.container.vehicleRepository,
+                    app.container.fuelRepository
+                )
+            )
+
+            LaunchedEffect(vehicleId) {
+                viewModel.selectVehicleById(vehicleId)
+            }
+
             DashboardScreen(
                 viewModel = viewModel,
                 onAddFuelClick = {
-
-                    val vehicleId =
-                        viewModel.uiState.value.selectedVehicle?.id
-
-                    if (vehicleId != null) {
-                        navController.navigate(
-                            Routes.addFuel(vehicleId)
-                        )
-                    }
+                    navController.navigate(
+                        Routes.addFuel(vehicleId)
+                    )
                 },
                 onHistoryClick = {
-                    val vehicleId = viewModel.uiState.value.selectedVehicle?.id
-                    if (vehicleId != null) {
-                        navController.navigate(Routes.history(vehicleId))
+                    navController.navigate(
+                        Routes.history(vehicleId)
+                    )
+                },
+                onBack = {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) {
+                            inclusive = false
+                        }
+                        launchSingleTop = true
+                    }
+                },
+                onVehicleDeleted = {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.HOME) {
+                            inclusive = false
+                        }
+                        launchSingleTop = true
                     }
                 }
             )
@@ -89,14 +207,14 @@ fun AppNavigation() {
             val context = LocalContext.current
             val app = context.applicationContext as FuelGarageApplication
             val viewModel =
-                viewModel<AddFuelViewModel>(
+                viewModel<FuelEntryViewModel>(
                     factory =
-                        AddFuelViewModelFactory(
+                        FuelEntryViewModelFactory(
                             app.container.fuelRepository,
                             app.container.vehicleRepository
                         )
                 )
-            AddFuelScreen(
+            FuelEntryScreen(
                 viewModel = viewModel,
                 vehicleId = vehicleId,
                 isEditMode = false,
@@ -123,9 +241,9 @@ fun AppNavigation() {
             val app = context.applicationContext as FuelGarageApplication
 
             val viewModel =
-                viewModel<AddFuelViewModel>(
+                viewModel<FuelEntryViewModel>(
                     factory =
-                        AddFuelViewModelFactory(
+                        FuelEntryViewModelFactory(
                             app.container.fuelRepository,
                             app.container.vehicleRepository
                         )
@@ -135,7 +253,7 @@ fun AppNavigation() {
                 viewModel.loadEntryForEdit(entryId)
             }
 
-            AddFuelScreen(
+            FuelEntryScreen(
                 viewModel = viewModel,
                 vehicleId = vehicleId,
                 isEditMode = true,
@@ -160,6 +278,7 @@ fun AppNavigation() {
                     factory =
                         HistoryViewModelFactory(
                             app.container.fuelRepository,
+                            app.container.vehicleRepository,
                             vehicleId
                         )
                 )
@@ -174,6 +293,11 @@ fun AppNavigation() {
                             vehicleId = vehicleId,
                             entryId = entry.id
                         )
+                    )
+                },
+                onAddFuel = {
+                    navController.navigate(
+                        Routes.addFuel(vehicleId)
                     )
                 }
             )

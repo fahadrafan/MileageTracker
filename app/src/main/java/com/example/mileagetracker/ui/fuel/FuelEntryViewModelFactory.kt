@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.mileagetracker.data.repository.FuelRepository
 import com.example.mileagetracker.data.repository.VehicleRepository
 
-class AddFuelViewModelFactory(
+class FuelEntryViewModelFactory(
     private val fuelRepository: FuelRepository,
     private val vehicleRepository: VehicleRepository
 ) : ViewModelProvider.Factory {
@@ -17,11 +17,11 @@ class AddFuelViewModelFactory(
 
         if (
                 modelClass.isAssignableFrom(
-                        AddFuelViewModel::class.java
+                        FuelEntryViewModel::class.java
             )
         ) {
 
-            return AddFuelViewModel(
+            return FuelEntryViewModel(
                 fuelRepository,
                 vehicleRepository
             ) as T
