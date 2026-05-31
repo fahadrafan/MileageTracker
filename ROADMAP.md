@@ -2,253 +2,345 @@
 
 ---
 
-## Phase 1 — MVP Completion
+## Current Status
+
+Fuel Garage now has a strong MVP foundation:
+
+- Vehicle add, edit, delete
+- Fuel entry add, edit, delete
+- Dynamic fuel history with entry numbers
+- Dashboard statistics and recent fills
+- Vehicle and fuel-entry validation
+- Settings for theme, units, and currency
+- Local backup and restore using JSON
+- CSV export for spreadsheet-friendly data
+- Android Storage Access Framework export/import flow
+- Post-export sharing through Android share sheet
+- Polished empty states for vehicles and fuel entries
+
+The app is still offline-first and does not require accounts, Firebase, Google
+Drive SDK, or cloud sign-in.
+
+---
+
+## Phase 1 - MVP Completion
 
 ### Vehicle Management
 
 - [x] Add Vehicle
-- [ ] Edit Vehicle
-- [ ] Delete Vehicle
+- [x] Edit Vehicle
+- [x] Delete Vehicle
+- [x] Vehicle validation
+- [x] Vehicle name formatting
 
 ### Fuel Entries
 
 - [x] Add Fuel Entry
-- [ ] Edit Fuel Entry
-- [ ] Delete Fuel Entry
+- [x] Edit Fuel Entry
+- [x] Delete Fuel Entry
+- [x] Fuel quantity auto-calculation
+- [x] Chronology validation
+- [x] Soft warning for inserted entries
 
 ### Dashboard
 
 - [x] Basic Dashboard
-- [ ] Dashboard Polish
-- [ ] Recent Fill Details
+- [x] Vehicle statistics
+- [x] Current mileage
+- [x] Average mileage
+- [x] Cost per km
+- [x] Recent fills
+- [x] Empty recent-fills state
 
 ### History
 
-- [ ] Fuel History Screen
-- [ ] Monthly Grouping
+- [x] Fuel History Screen
+- [x] Dynamic entry numbers
+- [x] Edit fuel entry
+- [x] Delete fuel entry
+- [x] Empty history state
+- [ ] Monthly grouping
 - [ ] Filtering
 
-### Statistics
+### Settings
 
-- [ ] Statistics Screen
-- [ ] Mileage Charts
-- [ ] Fuel Cost Charts
-
----
-
-## Phase 2 — Usability Improvements
-
-### Search & Filtering
-
-- [ ] Search History
-- [ ] Filter by Vehicle
-- [ ] Filter by Date
-- [ ] Filter by Mileage
-- [ ] Filter by Cost
-
-### Validation
-
-- [ ] Odometer Validation
-- [ ] Negative Value Prevention
-- [ ] Input Error Handling
-
-### Quality of Life
-
-- [ ] Quick Add Entry
-- [ ] Reuse Previous Values
-- [ ] Empty States
+- [x] Theme setting
+- [x] Distance unit setting
+- [x] Fuel unit setting
+- [x] Currency setting
+- [x] Polished option picker dialogs
 
 ---
 
-## Phase 3 — Data Safety
+## Phase 2 - Data Safety
+
+### Backup and Restore
+
+- [x] Versioned backup model
+- [x] JSON backup export
+- [x] JSON backup import
+- [x] Replace-style restore
+- [x] Transaction-safe Room restore
+- [x] Storage Access Framework integration
+- [x] Export/import confirmation dialogs
+- [x] JSON-only import guidance
 
 ### Export
 
-- [ ] CSV Export
-- [ ] Excel Export
+- [x] CSV export
+- [x] Post-export share option
+- [ ] Excel export
 
-### Backup
+### Future Cloud Options
 
-- [ ] Local Backup
-- [ ] Restore Backup
+- [ ] Optional cloud sync research
+- [ ] Optional app-owned automatic local backups
+- [ ] Google Drive backup research
+- [ ] Cloud sync
+- [ ] Multi-device support
 
-### Cloud
-
-- [ ] Google Drive Backup
+Note: Google Drive SDK and sign-in are intentionally not part of the current
+backup strategy.
 
 ---
 
-## Phase 4 — Advanced Features
+## Phase 3 - Usability Improvements
 
-### Fuel Insights
+### Search and Filtering
 
-- [ ] Fuel Price Trends
-- [ ] Cost Per KM Trends
-- [ ] Fuel Consumption Reports
+- [ ] Search fuel history
+- [ ] Filter by date
+- [ ] Filter by mileage range
+- [ ] Filter by cost range
+- [ ] Sort history options
 
-### Maintenance Tracker
+### Quality of Life
 
-- [ ] Service Records
-- [ ] Oil Change Tracking
-- [ ] Insurance Renewal Tracking
-- [ ] PUC Reminders
+- [x] Reuse previous amount and fuel price
+- [x] Recalculate defaults when latest entry is deleted
+- [x] Empty states
+- [ ] Quick add entry
+- [ ] Recent fill details
+- [ ] Better success/error feedback across all forms
+- [ ] Confirmation before risky restore/import actions
+
+### Visual Polish
+
+- [ ] App icon
+- [ ] Splash screen
+- [ ] Final color and typography pass
+- [ ] Small-screen layout QA
+- [ ] Dark-theme QA
+
+---
+
+## Phase 4 - Statistics and Insights
+
+### Statistics Screen
+
+- [ ] Statistics Screen
+- [ ] Mileage charts
+- [ ] Fuel cost charts
+- [ ] Cost per km trend
+- [ ] Fuel price trend
+- [ ] Time filters
+- [ ] Best mileage
+- [ ] Worst mileage
+- [ ] Total distance summary
+- [ ] Total fuel summary
+- [ ] Total cost summary
+
+### Reports
+
+- [ ] Monthly fuel summary
+- [ ] Per-vehicle report
+- [ ] Best/worst mileage insights
+- [ ] Fuel consumption reports
+
+---
+
+## Phase 5 - Maintenance Tracker
+
+### Service Records
+
+- [ ] Service records
+- [ ] Oil change tracking
+- [ ] Insurance renewal tracking
+- [ ] PUC reminders
 
 ### Notifications
 
-- [ ] Service Due Reminders
-- [ ] Insurance Renewal Alerts
-- [ ] Maintenance Notifications
+- [ ] Service due reminders
+- [ ] Insurance renewal alerts
+- [ ] Maintenance notifications
+
+---
+
+## Phase 6 - Advanced and Fleet Features
+
+### Fuel Insights
+
+- [ ] Fuel price trends
+- [ ] Cost per km trends
+- [ ] Fuel consumption reports
 
 ### Synchronization
 
-- [ ] Cloud Sync
-- [ ] Multi-Device Support
+- [ ] Cloud sync
+- [ ] Multi-device support
 
 ### Fleet Features
 
-- [ ] Multiple Drivers
-- [ ] Fleet Dashboard
-- [ ] Shared Vehicles
+- [ ] Multiple drivers
+- [ ] Fleet dashboard
+- [ ] Shared vehicles
 
 ---
 
-# 🎨 Planned Screens
+## Planned Screens
 
-## Home Screen
+### Home Screen
 
-- Vehicle List
-- Default Vehicle
-- Quick Add Vehicle
+- [x] Vehicle list
+- [ ] Default vehicle
+- [ ] Quick add vehicle
 
----
+### Dashboard Screen
 
-## Dashboard Screen
+- [x] Current mileage
+- [x] Vehicle statistics
+- [x] Recent fuel fills
+- [ ] Recent fill details
 
-- Current Mileage
-- Vehicle Statistics
-- Recent Fuel Fills
+### Fuel Entry Screen
 
----
+- [x] Add fuel entry
+- [x] Edit fuel entry
+- [x] Mileage calculation support
 
-## Fuel Entry Screen
+### Fuel History Screen
 
-- Add/Edit Fuel Entry
-- Mileage Calculation Support
+- [x] Fuel entries
+- [x] Edit/delete
+- [ ] Grouped entries
+- [ ] Filtering
 
----
+### Statistics Screen
 
-## Fuel History Screen
+- [ ] Trend charts
+- [ ] Mileage analytics
+- [ ] Fuel cost analysis
 
-- Grouped Entries
-- Filtering
-- Edit/Delete
+### Settings Screen
 
----
-
-## Statistics Screen
-
-- Trend Charts
-- Mileage Analytics
-- Fuel Cost Analysis
-
----
-
-## Settings Screen
-
-- Backup & Restore
-- Export Data
-- Theme Settings
-- About
+- [x] Backup and restore
+- [x] Export data
+- [x] Theme settings
+- [ ] About
 
 ---
 
-# 🧪 Testing Checklist
+## Testing Checklist
 
-## Functional Testing
+### Functional Testing
 
-- [ ] Mileage Calculation Accuracy
-- [ ] Multi-Vehicle Switching
-- [ ] Fuel Entry Validation
-- [ ] Dashboard Metrics
-- [ ] Statistics Calculations
+- [ ] Mileage calculation accuracy
+- [ ] Multi-vehicle switching
+- [ ] Fuel entry validation
+- [ ] Dashboard metrics
+- [ ] Backup export/import
+- [ ] CSV export
+- [ ] Restore rollback behavior
 
-## UI Testing
+### UI Testing
 
-- [ ] Small Devices
+- [ ] Small devices
 - [ ] Tablets
-- [ ] Landscape Mode
-- [ ] Dark Theme
+- [ ] Landscape mode
+- [ ] Dark theme
+- [ ] Empty states
+- [ ] Export/import flows
 
-## Data Testing
+### Data Testing
 
-- [ ] Migration Testing
-- [ ] Database Integrity
-- [ ] Backup Restoration
+- [ ] Migration testing
+- [ ] Database integrity
+- [ ] Backup restoration
+- [ ] Restore with invalid JSON
+- [ ] Restore with unsupported backup version
 
 ---
 
-# 📦 Play Store Release Checklist
+## Play Store Release Checklist
 
-## Core Functionality
+### Core Functionality
 
-- [ ] Vehicle CRUD
-- [ ] Fuel Entry CRUD
-- [ ] Dashboard Complete
-- [ ] History Screen
+- [x] Vehicle CRUD
+- [x] Fuel Entry CRUD
+- [x] Dashboard basics
+- [x] History Screen
+- [x] Settings Screen
+- [x] Backup and Restore
 - [ ] Statistics Screen
 
-## Quality
+### Quality
 
-- [ ] Empty States
-- [ ] Error Handling
-- [ ] Dark Mode
-- [ ] App Icon
-- [ ] Splash Screen
+- [x] Empty States
+- [x] Basic error handling
+- [x] Dark mode support
+- [ ] App icon
+- [ ] Splash screen
+- [ ] Privacy policy
+- [ ] Backup/restore manual QA
 
-## Store Assets
+### Store Assets
 
-- [ ] Privacy Policy
 - [ ] Screenshots
-- [ ] Feature Graphic
-- [ ] Store Listing Content
+- [ ] Feature graphic
+- [ ] Store listing content
+- [ ] Release notes
 
 ---
 
-# 📅 Recommended Development Order
+## Recommended Development Order
 
-## Sprint 1
+### Sprint 1 - Stabilize Backup and Export
 
-- Vehicle Edit
-- Vehicle Delete
-- Dashboard Finalization
+- Test JSON export/import on device
+- Test CSV export and share flow
+- Add backup-specific tests
+- Improve restore error messages
 
-## Sprint 2
+### Sprint 2 - App Identity and Polish
 
-- Fuel History Screen
-- Edit Fuel Entry
-- Delete Fuel Entry
+- Add app icon
+- Add splash screen
+- Final pass on settings, empty states, and dialogs
+- Small-device and dark-theme QA
 
-## Sprint 3
+### Sprint 3 - History Improvements
 
-- Statistics Screen
-- Charts Integration
+- Add history search
+- Add date filtering
+- Add monthly grouping
 
-## Sprint 4
+### Sprint 4 - Statistics
 
-- Export Features
-- Backup & Restore
-- Release Preparation
+- Build statistics screen
+- Add mileage and fuel-cost charts
+- Add report summaries
 
 ---
 
-# 📌 Current Sprint
+## Current Sprint
 
 ### Active Tasks
 
-- Vehicle Edit Feature
-- Vehicle Delete Feature
-- Dashboard Refinement
+- Device-test backup JSON export/import
+- Device-test CSV export and share
+- Polish Settings and empty states
 
 ### Next Milestone
 
-Implement Fuel History Screen and Fuel Entry Management.
+Stabilize the backup/export release candidate, then move to app icon and launch
+polish before starting the Statistics screen.
