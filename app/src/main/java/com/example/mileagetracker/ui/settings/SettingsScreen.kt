@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +21,7 @@ import com.example.mileagetracker.data.preferences.model.Currency
 import com.example.mileagetracker.data.preferences.model.DistanceUnit
 import com.example.mileagetracker.data.preferences.model.FuelUnit
 import com.example.mileagetracker.data.preferences.model.ThemeMode
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -733,6 +735,19 @@ fun SelectionDialog(
     onDismiss: () -> Unit,
     onOptionSelected: (String) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+    var visibleSelection by remember(selectedOption) {
+        mutableStateOf(selectedOption)
+    }
+
+    fun selectOption(option: String) {
+        visibleSelection = option
+
+        scope.launch {
+            delay(250)
+            onOptionSelected(option)
+        }
+    }
 
     AlertDialog(
 
@@ -746,7 +761,7 @@ fun SelectionDialog(
 
             Column {
 
-                options.forEach { option ->
+                options.forEachIndexed { index, option ->
 
                     Row(
 
@@ -754,7 +769,7 @@ fun SelectionDialog(
                             .fillMaxWidth()
                             .clickable {
 
-                                onOptionSelected(option)
+                                selectOption(option)
                             }
                             .padding(vertical = 12.dp),
 
@@ -763,21 +778,23 @@ fun SelectionDialog(
 
                     ) {
 
-                        RadioButton(
-                            selected =
-                                option == selectedOption,
-
-                            onClick = {
-
-                                onOptionSelected(option)
-                            }
+                        Text(
+                            text = option,
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.bodyLarge
                         )
 
-                        Spacer(
-                            modifier = Modifier.width(12.dp)
-                        )
+                        if (option == visibleSelection) {
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
 
-                        Text(option)
+                    if (index < options.lastIndex) {
+                        HorizontalDivider()
                     }
                 }
             }
