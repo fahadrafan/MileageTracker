@@ -1,8 +1,7 @@
 package com.example.mileagetracker.di
 
 import android.content.Context
-import com.example.mileagetracker.backup.BackupManager
-import com.example.mileagetracker.backup.RestoreManager
+import com.example.mileagetracker.backup.BackupAndRestoreManager
 import com.example.mileagetracker.data.database.DatabaseProvider
 import com.example.mileagetracker.data.preferences.UserPreferencesRepository
 import com.example.mileagetracker.data.repository.VehicleRepository
@@ -14,13 +13,7 @@ class AppContainer(context: Context) {
     val fuelRepository = FuelRepository(database.fuelEntryDao())
     val preferencesRepository = UserPreferencesRepository(context.applicationContext)
 
-    val backupManager = BackupManager(
-        vehicleRepository,
-        fuelRepository,
-        preferencesRepository
-    )
-
-    val restoreManager = RestoreManager(
+    val backupAndRestoreManager = BackupAndRestoreManager(
         database,
         vehicleRepository,
         fuelRepository,

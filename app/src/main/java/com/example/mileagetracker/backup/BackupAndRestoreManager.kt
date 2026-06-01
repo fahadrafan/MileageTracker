@@ -1,22 +1,34 @@
 package com.example.mileagetracker.backup
 
+import androidx.room.withTransaction
+import com.example.mileagetracker.data.database.FuelGarageDatabase
+import com.example.mileagetracker.data.entity.Vehicle
 import com.example.mileagetracker.data.preferences.UserPreferencesRepository
 import com.example.mileagetracker.data.repository.FuelRepository
 import com.example.mileagetracker.data.repository.VehicleRepository
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-class BackupManager(
+class BackupAndRestoreManager(
+    private val database: FuelGarageDatabase,
     private val vehicleRepository: VehicleRepository,
     private val fuelRepository: FuelRepository,
     private val preferencesRepository: UserPreferencesRepository,
     private val json: Json = backupJson
 ) {
     suspend fun exportJson(): String {
+        val vehicles = vehicleRepository.getAllVehiclesList()
+
+        if (vehicles.isEmpty()) {
+            throw EmptyBackupDataError()
+        }
+
         val data = BackupData(
-            vehicles = vehicleRepository.getAllVehiclesList().map { it.toBackup() },
+            version = BackupVersion.CURRENT,
+            vehicles = vehicles.map { it.toBackup() },
             fuelEntries = fuelRepository.getAllEntriesList().map { it.toBackup() },
             settings = preferencesRepository.getSettingsSnapshot().toBackup()
         )
@@ -26,24 +38,16 @@ class BackupManager(
 
     suspend fun exportCsv(): String {
         val vehicles = vehicleRepository.getAllVehiclesList()
+
+        if (vehicles.isEmpty()) {
+            throw EmptyBackupDataError()
+        }
+
         val entries = fuelRepository.getAllEntriesList()
             .groupBy { it.vehicleId }
 
         return buildString {
-            appendLine(
-                listOf(
-                    "vehicle_name",
-                    "registration_number",
-                    "vehicle_type",
-                    "fuel_type",
-                    "date",
-                    "odometer_km",
-                    "amount_paid",
-                    "fuel_price",
-                    "fuel_quantity",
-                    "full_tank"
-                ).joinToString(",")
-            )
+            appendLine(csvHeader)
 
             vehicles.forEach { vehicle ->
                 val vehicleEntries = entries[vehicle.id].orEmpty()
@@ -72,9 +76,37 @@ class BackupManager(
         }
     }
 
-    private fun vehicleCsvPrefix(
-        vehicle: com.example.mileagetracker.data.entity.Vehicle
-    ): String {
+    suspend fun restore(jsonText: String) {
+        val backup = try {
+            json.decodeFromString(BackupData.serializer(), jsonText)
+        } catch (error: SerializationException) {
+            throw InvalidBackupFileError(error)
+        } catch (error: IllegalArgumentException) {
+            throw InvalidBackupFileError(error)
+        }
+
+        if (!BackupVersion.isSupported(backup.version)) {
+            throw UnsupportedBackupVersionError(backup.version)
+        }
+
+        if (backup.vehicles.isEmpty()) {
+            throw EmptyRestoreDataError()
+        }
+
+        try {
+            database.withTransaction {
+                fuelRepository.deleteAllEntries()
+                vehicleRepository.deleteAllVehicles()
+                vehicleRepository.addVehicles(backup.vehicles.map { it.toEntity() })
+                fuelRepository.addFuelEntries(backup.fuelEntries.map { it.toEntity() })
+                preferencesRepository.restoreSettings(backup.settings.toAppSettings())
+            }
+        } catch (error: Exception) {
+            throw RestoreFailedError(error)
+        }
+    }
+
+    private fun vehicleCsvPrefix(vehicle: Vehicle): String {
         return listOf(
             vehicle.name,
             vehicle.registrationNumber,
@@ -103,6 +135,20 @@ class BackupManager(
 internal val backupJson = Json {
     prettyPrint = true
     ignoreUnknownKeys = true
+    encodeDefaults = true
 }
 
 private val csvDateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
+
+private val csvHeader = listOf(
+    "vehicle_name",
+    "registration_number",
+    "vehicle_type",
+    "fuel_type",
+    "date",
+    "odometer_km",
+    "amount_paid",
+    "fuel_price",
+    "fuel_quantity",
+    "full_tank"
+).joinToString(",")

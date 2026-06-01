@@ -2,6 +2,7 @@ package com.example.mileagetracker.ui.settings
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -44,7 +45,10 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingExport by remember { mutableStateOf<PendingExport?>(null) }
     var exportedFile by remember { mutableStateOf<ExportedFile?>(null) }
+    var exportError by remember { mutableStateOf<String?>(null) }
+    var importResult by remember { mutableStateOf<ImportResult?>(null) }
     var showExportScreen by remember { mutableStateOf(false) }
     var exportFormat by remember { mutableStateOf<ExportFormat?>(null) }
     var showImportInfoDialog by remember { mutableStateOf(false) }
@@ -82,20 +86,23 @@ fun SettingsScreen(
     val jsonExportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
+        val export = pendingExport
+        pendingExport = null
+
+        if (uri == null || export == null) return@rememberLauncherForActivityResult
 
         scope.launch {
             runCatching {
-                writeText(uri, viewModel.exportBackupJson())
+                writeText(uri, export.content)
             }.onSuccess {
                 exportedFile = ExportedFile(
-                    title = "Backup Exported",
-                    message = "Your backup JSON file has been saved. Do you want to share it now?",
+                    title = export.successTitle,
+                    message = export.successMessage,
                     uri = uri,
-                    mimeType = "application/json"
+                    mimeType = export.mimeType
                 )
             }.onFailure {
-                showMessage("Export failed")
+                exportError = it.message ?: "Export failed. Please try again."
             }
         }
     }
@@ -103,20 +110,23 @@ fun SettingsScreen(
     val csvExportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("text/csv")
     ) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
+        val export = pendingExport
+        pendingExport = null
+
+        if (uri == null || export == null) return@rememberLauncherForActivityResult
 
         scope.launch {
             runCatching {
-                writeText(uri, viewModel.exportBackupCsv())
+                writeText(uri, export.content)
             }.onSuccess {
                 exportedFile = ExportedFile(
-                    title = "CSV Exported",
-                    message = "Your CSV file has been saved. Do you want to share it now?",
+                    title = export.successTitle,
+                    message = export.successMessage,
                     uri = uri,
-                    mimeType = "text/csv"
+                    mimeType = export.mimeType
                 )
             }.onFailure {
-                showMessage("CSV export failed")
+                exportError = it.message ?: "CSV export failed. Please try again."
             }
         }
     }
@@ -141,6 +151,10 @@ fun SettingsScreen(
 
     var showCurrencyDialog by remember {
         mutableStateOf(false)
+    }
+
+    BackHandler(enabled = showExportScreen) {
+        showExportScreen = false
     }
 
     Scaffold(
@@ -360,6 +374,54 @@ fun SettingsScreen(
         )
     }
 
+    exportError?.let { message ->
+
+        AlertDialog(
+            onDismissRequest = {
+                exportError = null
+            },
+            title = {
+                Text("Export Failed")
+            },
+            text = {
+                Text(message)
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        exportError = null
+                    }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
+    importResult?.let { result ->
+
+        AlertDialog(
+            onDismissRequest = {
+                importResult = null
+            },
+            title = {
+                Text(result.title)
+            },
+            text = {
+                Text(result.message)
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        importResult = null
+                    }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
     exportFormat?.let { format ->
 
         AlertDialog(
@@ -377,16 +439,43 @@ fun SettingsScreen(
                     onClick = {
                         exportFormat = null
 
-                        when (format) {
-                            ExportFormat.JSON ->
-                                jsonExportLauncher.launch(
-                                    "fuel_garage_backup.json"
-                                )
+                        scope.launch {
+                            runCatching {
+                                when (format) {
+                                    ExportFormat.JSON ->
+                                        PendingExport(
+                                            content = viewModel.exportBackupJson(),
+                                            successTitle = "Backup Exported",
+                                            successMessage = "Your backup JSON file has been saved. Do you want to share it now?",
+                                            mimeType = "application/json"
+                                        )
 
-                            ExportFormat.CSV ->
-                                csvExportLauncher.launch(
-                                    "fuel_garage_data.csv"
-                                )
+                                    ExportFormat.CSV ->
+                                        PendingExport(
+                                            content = viewModel.exportBackupCsv(),
+                                            successTitle = "CSV Exported",
+                                            successMessage = "Your CSV file has been saved. Do you want to share it now?",
+                                            mimeType = "text/csv"
+                                        )
+                                }
+                            }.onSuccess { export ->
+                                pendingExport = export
+
+                                when (format) {
+                                    ExportFormat.JSON ->
+                                        jsonExportLauncher.launch(
+                                            "fuel_garage_backup.json"
+                                        )
+
+                                    ExportFormat.CSV ->
+                                        csvExportLauncher.launch(
+                                            "fuel_garage_data.csv"
+                                        )
+                                }
+                            }.onFailure {
+                                exportError = it.message
+                                    ?: "Export failed. Please try again."
+                            }
                         }
                     }
                 ) {
@@ -415,7 +504,7 @@ fun SettingsScreen(
                 Text("Import Backup JSON")
             },
             text = {
-                Text("Only backup JSON files exported from Fuel Garage can be imported. CSV files are for viewing only and cannot restore app data.")
+                Text("Only backup JSON files exported from Fuel Garage can be imported. CSV files are for viewing only and cannot restore app data.\n\nNote: Any existing vehicle data will be erased before importing.\n\nDo you want to continue?")
             },
             confirmButton = {
                 TextButton(
@@ -426,7 +515,7 @@ fun SettingsScreen(
                         )
                     }
                 ) {
-                    Text("Choose File")
+                    Text("Yes, Choose File")
                 }
             },
             dismissButton = {
@@ -461,12 +550,19 @@ fun SettingsScreen(
                         scope.launch {
                             runCatching {
                                 val text = readText(uri)
-                                    ?: error("Could not read file")
+                                    ?: error("The selected file could not be opened. Please choose another backup JSON file.")
                                 viewModel.restoreBackupJson(text)
                             }.onSuccess {
-                                showMessage("Backup imported")
-                            }.onFailure {
-                                showMessage("Import failed")
+                                importResult = ImportResult(
+                                    title = "Success ✅",
+                                    message = "Your vehicles, fuel entries, and settings were restored successfully."
+                                )
+                            }.onFailure { error ->
+                                importResult = ImportResult(
+                                    title = "Import Failed ❌",
+                                    message = error.message
+                                        ?: "Restore failed. Your existing data was not changed."
+                                )
                             }
                         }
                     }
@@ -725,6 +821,18 @@ private data class ExportedFile(
     val message: String,
     val uri: Uri,
     val mimeType: String
+)
+
+private data class PendingExport(
+    val content: String,
+    val successTitle: String,
+    val successMessage: String,
+    val mimeType: String
+)
+
+private data class ImportResult(
+    val title: String,
+    val message: String
 )
 
 @Composable

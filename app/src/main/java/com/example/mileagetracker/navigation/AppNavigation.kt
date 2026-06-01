@@ -132,8 +132,7 @@ fun AppNavigation() {
             val viewModel: SettingsViewModel = viewModel(
                 factory = SettingsViewModelFactory(
                     app.container.preferencesRepository,
-                    app.container.backupManager,
-                    app.container.restoreManager
+                    app.container.backupAndRestoreManager
                 )
             )
 

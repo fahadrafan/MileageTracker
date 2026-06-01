@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BackupData(
-    val version: Int = BackupVersion.CURRENT,
+    val version: Int,
     val vehicles: List<BackupVehicle>,
     val fuelEntries: List<BackupFuelEntry>,
     val settings: BackupSettings
