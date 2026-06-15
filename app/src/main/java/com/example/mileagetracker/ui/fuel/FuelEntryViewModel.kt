@@ -28,6 +28,15 @@ class FuelEntryViewModel(
     private var originalOdometerKm: Double? = null
     private var originalDateMillis: Long? = null
 
+    private enum class FuelField {
+        AMOUNT,
+        PRICE,
+        QUANTITY
+    }
+
+    private var previousUserField: FuelField? = null
+    private var currentUserField: FuelField? = null
+
     val uiState: StateFlow<FuelEntryUiState> = _uiState.asStateFlow()
 
     init {
@@ -158,8 +167,7 @@ class FuelEntryViewModel(
 
     private fun validateOdometer(): String? {
         val value = _uiState.value.odometer.toDoubleOrNull() ?: return null
-
-        return if (value <= 0) "Odometer must be greater than 0"
+        return if (value < 0) "Odometer cannot be negative"
         else null
     }
 
@@ -171,29 +179,51 @@ class FuelEntryViewModel(
     }
 
     fun updateLitres(value: String) {
-        _uiState.value = _uiState.value.copy(fuelQuantity = value)
+        if (value.contains("-")) return
+
+        _uiState.value = _uiState.value.copy(
+            fuelQuantity = value,
+            fuelQuantityError = null
+        )
+
+        updateEditedFields(FuelField.QUANTITY)
+
+        when (setOf(previousUserField, currentUserField)) {
+            setOf(FuelField.AMOUNT, FuelField.QUANTITY) -> calculatePrice()
+            setOf(FuelField.PRICE, FuelField.QUANTITY) -> calculateAmount()
+        }
     }
 
     fun updateAmountPaid(value: String) {
-        if (value.contains("-")) {
-            return
-        }
+        if (value.contains("-")) return
+
         _uiState.value = _uiState.value.copy(
             amountPaid = value,
             amountPaidError = null
         )
-        calculateLitres()
+
+        updateEditedFields(FuelField.AMOUNT)
+
+        when (setOf(previousUserField, currentUserField)) {
+            setOf(FuelField.AMOUNT, FuelField.PRICE) -> calculateQuantity()
+            setOf(FuelField.AMOUNT, FuelField.QUANTITY) -> calculatePrice()
+        }
     }
 
     fun updateFuelPrice(value: String) {
-        if (value.contains("-")) {
-            return
-        }
+        if (value.contains("-")) return
+
         _uiState.value = _uiState.value.copy(
             fuelPrice = value,
             fuelPriceError = null
         )
-        calculateLitres()
+
+        updateEditedFields(FuelField.PRICE)
+
+        when (setOf(previousUserField, currentUserField)) {
+            setOf(FuelField.AMOUNT, FuelField.PRICE) -> calculateQuantity()
+            setOf(FuelField.PRICE, FuelField.QUANTITY) -> calculateAmount()
+        }
     }
 
     fun updateFullTank(value: Boolean) {
@@ -363,7 +393,7 @@ class FuelEntryViewModel(
                             ?.toString()
                             ?: "",
                 )
-                calculateLitres()
+                calculateQuantity()
             }
         }
     }
@@ -395,19 +425,66 @@ class FuelEntryViewModel(
     }
 
     @SuppressLint("DefaultLocale")
-    private fun calculateLitres() {
+    private fun calculateQuantity() {
         val amount = _uiState.value.amountPaid.toDoubleOrNull()
         val price = _uiState.value.fuelPrice.toDoubleOrNull()
         if (
-            amount == null
-            || price == null
-            || price <= 0
+            amount == null ||
+            price == null ||
+            price <= 0
         ) {
-            _uiState.value = _uiState.value.copy(fuelQuantity = "")
             return
         }
-        val litres = amount / price
-        _uiState.value = _uiState.value.copy(fuelQuantity = String.format("%.2f", litres))
+        val quantity = amount / price
+        _uiState.value = _uiState.value.copy(
+            fuelQuantity = String.format("%.2f", quantity)
+        )
+    }
+
+    @SuppressLint("DefaultLocale")
+    private fun calculatePrice() {
+        val amount = _uiState.value.amountPaid.toDoubleOrNull()
+        val quantity = _uiState.value.fuelQuantity.toDoubleOrNull()
+
+        if (
+            amount == null ||
+            quantity == null ||
+            quantity <= 0
+        ) {
+            return
+        }
+
+        val price = amount / quantity
+
+        _uiState.value = _uiState.value.copy(
+            fuelPrice = String.format("%.2f", price)
+        )
+    }
+
+    @SuppressLint("DefaultLocale")
+    private fun calculateAmount() {
+        val price = _uiState.value.fuelPrice.toDoubleOrNull()
+        val quantity = _uiState.value.fuelQuantity.toDoubleOrNull()
+
+        if (
+            price == null ||
+            quantity == null
+        ) {
+            return
+        }
+
+        val amount = price * quantity
+
+        _uiState.value = _uiState.value.copy(
+            amountPaid = String.format("%.2f", amount)
+        )
+    }
+
+    private fun updateEditedFields(field: FuelField) {
+        if (currentUserField != field) {
+            previousUserField = currentUserField
+            currentUserField = field
+        }
     }
 
     fun isEditing(): Boolean {

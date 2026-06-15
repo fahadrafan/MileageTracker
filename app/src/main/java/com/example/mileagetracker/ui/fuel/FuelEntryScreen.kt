@@ -314,16 +314,18 @@ fun FuelEntryScreen(
 
             OutlinedTextField(
                 value = uiState.fuelQuantity,
-                onValueChange = {},
+                onValueChange = { viewModel.updateLitres(it) },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                ),
                 label = {
                     Text(
                         "Fuel Quantity (${
                             if (fuelUnit == FuelUnit.GALLONS) "Gallons"
                             else "Litres"
-                        }) - Auto Calculated"
+                        })"
                     )
                 },
-                enabled = false,
                 modifier = Modifier.fillMaxWidth()
             )
 
