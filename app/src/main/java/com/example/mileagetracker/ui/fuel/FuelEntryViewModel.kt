@@ -172,14 +172,14 @@ class FuelEntryViewModel(
     }
 
     fun updateOdometer(value: String) {
-        if (!isValidDecimalInput(value)) return
-
+        if (!isValidOdometerInput(value)) return
+        if (value.length > 6) return
         _uiState.value = _uiState.value.copy(odometer = value, odometerError = null)
     }
 
     fun updateAmountPaid(value: String) {
         if (!isValidDecimalInput(value)) return
-
+        if (value.substringBefore(".").length > 7) return
         _uiState.value = _uiState.value.copy(
             amountPaid = value,
             amountPaidError = null
@@ -204,7 +204,7 @@ class FuelEntryViewModel(
 
     fun updateFuelPrice(value: String) {
         if (!isValidDecimalInput(value)) return
-
+        if (value.substringBefore(".").length > 6) return
         _uiState.value = _uiState.value.copy(
             fuelPrice = value,
             fuelPriceError = null
@@ -229,7 +229,7 @@ class FuelEntryViewModel(
 
     fun updateLitres(value: String) {
         if (!isValidDecimalInput(value)) return
-
+        if (value.substringBefore(".").length > 4) return
         _uiState.value = _uiState.value.copy(
             fuelQuantity = value,
             fuelQuantityError = null
@@ -283,6 +283,10 @@ class FuelEntryViewModel(
             dateError = "Future dates are not allowed"
         }
 
+        if (state.odometer.toDoubleOrNull() == null) {
+            odometerError = "Please enter a valid odometer reading"
+        }
+
         if (state.amountPaid.toDoubleOrNull() == null) {
             amountPaidError = "Please enter a valid amount"
         }
@@ -295,8 +299,25 @@ class FuelEntryViewModel(
             fuelQuantityError = "Please enter a valid fuel quantity"
         }
 
-        if (state.odometer.toDoubleOrNull() == null) {
-            odometerError = "Please enter a valid odometer reading"
+        val odometer = state.odometer.toDoubleOrNull()
+        val amountPaid = state.amountPaid.toDoubleOrNull()
+        val fuelPrice = state.fuelPrice.toDoubleOrNull()
+        val fuelQuantity = state.fuelQuantity.toDoubleOrNull()
+
+        if (odometer != null && odometer > 999_999) {
+            odometerError = "Odometer cannot exceed 999999"
+        }
+
+        if (amountPaid != null && amountPaid > 9_999_999) {
+            amountPaidError = "Amount is too large"
+        }
+
+        if (fuelPrice != null && fuelPrice > 999_999) {
+            fuelPriceError = "Fuel price is too large"
+        }
+
+        if (fuelQuantity != null && fuelQuantity > 9_999) {
+            fuelQuantityError = "Fuel quantity is too large"
         }
 
         _uiState.value = state.copy(
@@ -519,6 +540,10 @@ class FuelEntryViewModel(
 
     private fun isValidDecimalInput(value: String): Boolean {
         return value.matches(Regex("^\\d*\\.?\\d*$"))
+    }
+
+    private fun isValidOdometerInput(value: String): Boolean {
+        return value.matches(Regex("^\\d*$"))
     }
 
     fun isEditing(): Boolean {
