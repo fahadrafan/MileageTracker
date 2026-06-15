@@ -31,8 +31,6 @@ import com.example.mileagetracker.data.preferences.model.FuelUnit
 import com.example.mileagetracker.utils.formatCurrency
 import com.example.mileagetracker.utils.formatDistance
 import com.example.mileagetracker.utils.formatFuel
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.ExtendedFloatingActionButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +41,21 @@ fun HistoryScreen(
     onAddFuel: () -> Unit
 ) {
     val entries by viewModel.entries.collectAsState()
+
+    val entryNumbers = remember(entries) {
+        entries.mapIndexed { index, entry ->
+            entry.id to (entries.size - index)
+        }.toMap()
+    }
+
+    val groupedEntries = remember(entries) {
+        entries.groupBy {
+            SimpleDateFormat(
+                "MMMM yyyy",
+                Locale.getDefault()
+            ).format(Date(it.dateMillis))
+        }
+    }
 
     val context = LocalContext.current
 
@@ -192,17 +205,36 @@ fun HistoryScreen(
                     .padding(padding),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                itemsIndexed(entries) { index, entry ->
-                    val entryNumber = entries.size - index
-                    FuelEntryCard(
-                        entryNumber = entryNumber,
-                        entry = entry,
-                        distanceUnit = distanceUnit,
-                        fuelUnit = fuelUnit,
-                        currency = currency,
-                        onEditClick = { onEditEntry(entry) },
-                        onDeleteClick = { entryToDelete = entry }
-                    )
+                groupedEntries.forEach { (month, monthEntries) ->
+
+                    stickyHeader {
+                        Surface(
+                            color = MaterialTheme.colorScheme.surface
+                        ) {
+                            Text(
+                                text = month,
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        horizontal = 16.dp,
+                                        vertical = 8.dp
+                                    )
+                            )
+                        }
+                    }
+
+                    items(monthEntries) { entry ->
+                        FuelEntryCard(
+                            entryNumber = entryNumbers[entry.id] ?: 0,
+                            entry = entry,
+                            distanceUnit = distanceUnit,
+                            fuelUnit = fuelUnit,
+                            currency = currency,
+                            onEditClick = { onEditEntry(entry) },
+                            onDeleteClick = { entryToDelete = entry }
+                        )
+                    }
                 }
             }
         }
