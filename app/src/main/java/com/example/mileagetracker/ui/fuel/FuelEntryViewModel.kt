@@ -172,30 +172,13 @@ class FuelEntryViewModel(
     }
 
     fun updateOdometer(value: String) {
-        if (value.contains("-")) {
-            return
-        }
+        if (!isValidDecimalInput(value)) return
+
         _uiState.value = _uiState.value.copy(odometer = value, odometerError = null)
     }
 
-    fun updateLitres(value: String) {
-        if (value.contains("-")) return
-
-        _uiState.value = _uiState.value.copy(
-            fuelQuantity = value,
-            fuelQuantityError = null
-        )
-
-        updateEditedFields(FuelField.QUANTITY)
-
-        when (setOf(previousUserField, currentUserField)) {
-            setOf(FuelField.AMOUNT, FuelField.QUANTITY) -> calculatePrice()
-            setOf(FuelField.PRICE, FuelField.QUANTITY) -> calculateAmount()
-        }
-    }
-
     fun updateAmountPaid(value: String) {
-        if (value.contains("-")) return
+        if (!isValidDecimalInput(value)) return
 
         _uiState.value = _uiState.value.copy(
             amountPaid = value,
@@ -204,6 +187,15 @@ class FuelEntryViewModel(
 
         updateEditedFields(FuelField.AMOUNT)
 
+        if (previousUserField == null) {
+            previousUserField =
+                when {
+                    _uiState.value.fuelPrice.isNotBlank() -> FuelField.PRICE
+                    _uiState.value.fuelQuantity.isNotBlank() -> FuelField.QUANTITY
+                    else -> null
+                }
+        }
+
         when (setOf(previousUserField, currentUserField)) {
             setOf(FuelField.AMOUNT, FuelField.PRICE) -> calculateQuantity()
             setOf(FuelField.AMOUNT, FuelField.QUANTITY) -> calculatePrice()
@@ -211,7 +203,7 @@ class FuelEntryViewModel(
     }
 
     fun updateFuelPrice(value: String) {
-        if (value.contains("-")) return
+        if (!isValidDecimalInput(value)) return
 
         _uiState.value = _uiState.value.copy(
             fuelPrice = value,
@@ -220,8 +212,41 @@ class FuelEntryViewModel(
 
         updateEditedFields(FuelField.PRICE)
 
+        if (previousUserField == null) {
+            previousUserField =
+                when {
+                    _uiState.value.amountPaid.isNotBlank() -> FuelField.AMOUNT
+                    _uiState.value.fuelQuantity.isNotBlank() -> FuelField.QUANTITY
+                    else -> null
+                }
+        }
+
         when (setOf(previousUserField, currentUserField)) {
             setOf(FuelField.AMOUNT, FuelField.PRICE) -> calculateQuantity()
+            setOf(FuelField.PRICE, FuelField.QUANTITY) -> calculateAmount()
+        }
+    }
+
+    fun updateLitres(value: String) {
+        if (!isValidDecimalInput(value)) return
+
+        _uiState.value = _uiState.value.copy(
+            fuelQuantity = value,
+            fuelQuantityError = null
+        )
+
+        updateEditedFields(FuelField.QUANTITY)
+        if (previousUserField == null) {
+            previousUserField =
+                when {
+                    _uiState.value.amountPaid.isNotBlank() -> FuelField.AMOUNT
+                    _uiState.value.fuelPrice.isNotBlank() -> FuelField.PRICE
+                    else -> null
+                }
+        }
+
+        when (setOf(previousUserField, currentUserField)) {
+            setOf(FuelField.AMOUNT, FuelField.QUANTITY) -> calculatePrice()
             setOf(FuelField.PRICE, FuelField.QUANTITY) -> calculateAmount()
         }
     }
@@ -237,6 +262,7 @@ class FuelEntryViewModel(
         var odometerError: String? = null
         var amountPaidError: String? = null
         var fuelPriceError: String? = null
+        var fuelQuantityError: String? = null
 
         val formatter =
             SimpleDateFormat("dd-MMM-yy", Locale.getDefault()).apply {
@@ -257,35 +283,39 @@ class FuelEntryViewModel(
             dateError = "Future dates are not allowed"
         }
 
-        if (state.odometer.isBlank()) {
-            odometerError = "Please enter odometer reading"
-        } else {
-            odometerError = validateOdometer()
+        if (state.amountPaid.toDoubleOrNull() == null) {
+            amountPaidError = "Please enter a valid amount"
         }
 
-        if (state.amountPaid.isBlank()) {
-            amountPaidError = "Please enter amount paid"
+        if (state.fuelPrice.toDoubleOrNull() == null) {
+            fuelPriceError = "Please enter a valid fuel price"
         }
 
-        if (state.fuelPrice.isBlank()) {
-            fuelPriceError = "Please enter fuel price"
+        if (state.fuelQuantity.toDoubleOrNull() == null) {
+            fuelQuantityError = "Please enter a valid fuel quantity"
+        }
+
+        if (state.odometer.toDoubleOrNull() == null) {
+            odometerError = "Please enter a valid odometer reading"
         }
 
         _uiState.value = state.copy(
             dateError = dateError,
             odometerError = odometerError,
             amountPaidError = amountPaidError,
-            fuelPriceError = fuelPriceError
+            fuelPriceError = fuelPriceError,
+            fuelQuantityError = fuelQuantityError
         )
 
         if (
             dateError != null ||
             odometerError != null ||
             amountPaidError != null ||
-            fuelPriceError != null
-        ) {
+            fuelPriceError != null ||
+            fuelQuantityError != null
+        )
             return
-        }
+
 
         viewModelScope.launch {
 
@@ -485,6 +515,10 @@ class FuelEntryViewModel(
             previousUserField = currentUserField
             currentUserField = field
         }
+    }
+
+    private fun isValidDecimalInput(value: String): Boolean {
+        return value.matches(Regex("^\\d*\\.?\\d*$"))
     }
 
     fun isEditing(): Boolean {
