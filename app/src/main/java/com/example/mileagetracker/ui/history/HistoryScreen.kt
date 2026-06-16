@@ -265,10 +265,32 @@ private fun FuelEntryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(
-                        text = "Entry #$entryNumber",
-                        style = MaterialTheme.typography.labelLarge
-                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+
+                        Text(
+                            text = "Entry #$entryNumber",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+
+                        if (entry.fullTank) {
+                            AssistChip(
+                                onClick = {},
+                                enabled = false,
+                                label = {
+                                    Text(
+                                        text = "FULL TANK",
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                },
+                                modifier = Modifier.height(28.dp)
+                            )
+                        }
+                    }
+
                     Text(
                         text = formatDate(entry.dateMillis),
                         style = MaterialTheme.typography.titleMedium
@@ -326,50 +348,38 @@ private fun FuelEntryCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
-                "Odometer Reading: ${
-                    formatDistance(
-                        entry.odometerKm,
-                        distanceUnit
-                    )
-                }"
-            )
-            Text(
-                "Amount Paid: ${
-                    formatCurrency(
-                        entry.amountPaid,
-                        currency
-                    )
-                }"
-            )
-            Text(
-                "Fuel Price: ${
-                    formatCurrency(
-                        entry.fuelPrice,
-                        currency
-                    )
-                }/${
-                    if (fuelUnit == FuelUnit.GALLONS) "gal"
-                    else "L"
-                }"
-            )
-            Text(
-                "Fuel Quantity: ${
-                    formatFuel(
-                        entry.fuelQuantity,
-                        fuelUnit
-                    )
-                }"
+                text = formatDistance(
+                    entry.odometerKm,
+                    distanceUnit
+                ),
+                style = MaterialTheme.typography.headlineMedium
             )
 
-            if (entry.fullTank) {
-                Spacer(modifier = Modifier.height(6.dp))
-                AssistChip(
-                    onClick = {},
-                    label = { Text("FULL TANK") }
-                )
-            }
+            Text(
+                text = "Odometer",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = formatCurrency(
+                    entry.amountPaid,
+                    currency
+                ),
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text =
+                    "${formatFuel(entry.fuelQuantity, fuelUnit)} @ " +
+                            "${formatCurrency(entry.fuelPrice, currency)}/" +
+                            if (fuelUnit == FuelUnit.GALLONS) "gal" else "L",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
         }
     }
 }
