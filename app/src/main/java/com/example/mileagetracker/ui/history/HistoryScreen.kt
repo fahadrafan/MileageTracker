@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,6 +20,9 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocalGasStation
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
 import com.example.mileagetracker.data.entity.FuelEntry
 import java.text.SimpleDateFormat
 import java.util.*
@@ -83,6 +87,25 @@ fun HistoryScreen(
 
     var entryToDelete by remember { mutableStateOf<FuelEntry?>(null) }
 
+    var showExtendedFab by remember {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(entries.isEmpty()) {
+        if (entries.isEmpty()) {
+            // Start as normal FAB
+            showExtendedFab = false
+            // Wait 1 second
+            delay(1000)
+            // Expand
+            showExtendedFab = true
+            // Keep expanded for 5 seconds
+            delay(5000)
+            // Shrink back
+            showExtendedFab = false
+        }
+    }
+
     if (entryToDelete != null) {
         AlertDialog(
             onDismissRequest = { entryToDelete = null },
@@ -137,11 +160,20 @@ fun HistoryScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddFuel
-            ) {
-                Text("+")
-            }
+            ExtendedFloatingActionButton(
+                onClick = onAddFuel,
+                expanded = entries.isEmpty() && showExtendedFab,
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp)
+                    )
+                },
+                text = {
+                    Text("Tap here to log your first fill")
+                }
+            )
         }
     ) { padding ->
         if (entries.isEmpty()) {

@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import kotlinx.coroutines.delay
 import com.example.mileagetracker.ui.vehicle.VehicleDialog
 import com.example.mileagetracker.data.entity.FuelType
 import com.example.mileagetracker.data.entity.VehicleType
@@ -111,6 +112,10 @@ fun DashboardScreen(
 
 
     var showDeleteDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var showExtendedFab by remember {
         mutableStateOf(false)
     }
 
@@ -220,6 +225,27 @@ fun DashboardScreen(
         )
     }
 
+    LaunchedEffect(uiState.recentEntries.isEmpty()) {
+
+        if (uiState.recentEntries.isEmpty()) {
+
+            // Start collapsed
+            showExtendedFab = false
+
+            // Wait 1 second
+            delay(1000)
+
+            // Expand
+            showExtendedFab = true
+
+            // Stay expanded
+            delay(5000)
+
+            // Collapse
+            showExtendedFab = false
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -266,11 +292,24 @@ fun DashboardScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddFuelClick
-            ) {
-                Icon(Icons.Default.Add, null)
-            }
+
+            ExtendedFloatingActionButton(
+                onClick = onAddFuelClick,
+
+                expanded = uiState.recentEntries.isEmpty() && showExtendedFab,
+
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp)
+                    )
+                },
+
+                text = {
+                    Text("Tap here to log your first fill")
+                }
+            )
         }
     ) { padding ->
 
