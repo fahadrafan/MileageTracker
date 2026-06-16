@@ -1,5 +1,6 @@
 package com.example.mileagetracker.ui.fuel
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -191,6 +192,10 @@ fun FuelEntryScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
+            Text(
+                text = "Refuel Details",
+                style = MaterialTheme.typography.titleMedium
+            )
             OutlinedTextField(
                 value = uiState.refillDateText,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -258,12 +263,25 @@ fun FuelEntryScreen(
                 Text(
                     text =
                         "Last Reading: ${uiState.lastOdometer} ${
-                            if (distanceUnit == DistanceUnit.MILES) "mi"
-                            else "km"
+                            if (distanceUnit == DistanceUnit.MILES) "mi" else "km"
                         }",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Fuel Details",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Text(
+                text = "Enter any two values to calculate the third.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
             OutlinedTextField(
                 value = uiState.amountPaid,
@@ -330,25 +348,25 @@ fun FuelEntryScreen(
             )
 
             Row(
+                modifier = Modifier.clickable {
+                    viewModel.updateFullTank(!uiState.fullTank)
+                },
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                Checkbox(
+                Switch(
                     checked = uiState.fullTank,
                     onCheckedChange = {
                         viewModel.updateFullTank(it)
                     }
                 )
 
-                TextButton(
-                    onClick = {
-                        viewModel.updateFullTank(
-                            !uiState.fullTank
-                        )
-                    }
-                ) {
-                    Text("Full Tank")
-                }
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = "Full Tank",
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
 
             Row(
