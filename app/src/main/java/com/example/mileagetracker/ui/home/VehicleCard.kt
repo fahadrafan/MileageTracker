@@ -59,7 +59,7 @@ fun VehicleCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(20.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row {
@@ -92,51 +92,85 @@ fun VehicleCard(
             Column(
                 horizontalAlignment = Alignment.End
             ) {
-                Box {
-                    IconButton(
-                        onClick = {
-                            showMenu = true
-                        }
+
+                Row(
+                    verticalAlignment = Alignment.Top
+                ) {
+
+                    Column(
+                        horizontalAlignment = Alignment.End
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Vehicle Menu"
-                        )
+
+                        if (mileage != null && mileage > 0) {
+
+                            Text(
+                                text = formatMileage(mileage, distanceUnit),
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+
+                            Text(
+                                text = "Current Mileage",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                        } else {
+
+                            Text(
+                                text = "No data",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+
+                            Text(
+                                text = "No fuel entries yet",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = {
-                            showMenu = false
+
+                    Box {
+
+                        IconButton(
+                            onClick = {
+                                showMenu = true
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Vehicle Menu"
+                            )
                         }
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Text("Edit")
-                            },
-                            onClick = {
+
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = {
                                 showMenu = false
-                                onEdit()
                             }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text("Delete")
-                            },
-                            onClick = {
-                                showMenu = false
-                                onDelete()
-                            }
-                        )
+                        ) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text("Edit")
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    onEdit()
+                                }
+                            )
+
+                            DropdownMenuItem(
+                                text = {
+                                    Text("Delete")
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    onDelete()
+                                }
+                            )
+                        }
                     }
                 }
 
-                Text(
-                    text = mileage?.let {
-                        if (it > 0) formatMileage(it, distanceUnit)
-                        else "--"
-                    } ?: "--",
-                    style = MaterialTheme.typography.headlineSmall
-                )
             }
         }
     }
