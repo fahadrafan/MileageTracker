@@ -297,7 +297,7 @@ fun DashboardScreen(
                         ) {
 
                             Column {
-                                
+
                                 Row(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
@@ -532,13 +532,17 @@ private fun StatCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Text(title)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                value,
-                style = MaterialTheme.typography.titleLarge
+                text = value,
+                style = MaterialTheme.typography.headlineSmall
             )
         }
     }
