@@ -237,6 +237,31 @@ fun DashboardScreen(
                             contentDescription = "Back"
                         )
                     }
+                },
+                actions = {
+                    TextButton(
+                        onClick = {
+                            uiState.selectedVehicle?.let { vehicle ->
+                                editingVehicleId = vehicle.id
+                                vehicleName = vehicle.name
+                                registrationNumber = vehicle.registrationNumber
+                                selectedFuelType = vehicle.fuelType
+                                selectedType = vehicle.type
+                                isEditVehicle = true
+                                showDialog = true
+                            }
+                        }
+                    ) {
+                        Text("Edit")
+                    }
+
+                    TextButton(
+                        onClick = {
+                            showDeleteDialog = true
+                        }
+                    ) {
+                        Text("Delete")
+                    }
                 }
             )
         },
@@ -264,45 +289,53 @@ fun DashboardScreen(
                 ) {
 
                     Column(
-                        modifier = Modifier.padding(20.dp)
+                        modifier = Modifier.padding(24.dp)
                     ) {
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
 
-                            Text(
-                                text = uiState.selectedVehicle?.name ?: "Vehicle",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-
-                            Spacer(
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            Row {
-                                TextButton(
-                                    onClick = {
-                                        uiState.selectedVehicle?.let { vehicle ->
-                                            editingVehicleId = vehicle.id
-                                            vehicleName = vehicle.name
-                                            registrationNumber = vehicle.registrationNumber
-                                            selectedFuelType = vehicle.fuelType
-                                            selectedType = vehicle.type
-                                            isEditVehicle = true
-                                            showDialog = true
+                            Column {
+                                
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    AssistChip(
+                                        onClick = {},
+                                        enabled = false,
+                                        label = {
+                                            uiState.selectedVehicle?.type?.name
+                                                ?.lowercase()
+                                                ?.replaceFirstChar { it.uppercase() }
+                                                ?.let { Text(it) }
                                         }
-                                    }
-                                ) {
-                                    Text("Edit")
+                                    )
+
+                                    AssistChip(
+                                        onClick = {},
+                                        enabled = false,
+                                        label = {
+                                            uiState.selectedVehicle?.fuelType?.name
+                                                ?.lowercase()
+                                                ?.replaceFirstChar { it.uppercase() }
+                                                ?.let { Text(it) }
+                                        }
+                                    )
                                 }
-                                TextButton(
-                                    onClick = {
-                                        showDeleteDialog = true
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                uiState.selectedVehicle?.registrationNumber?.takeIf { it.isNotBlank() }
+                                    ?.let {
+                                        Spacer(modifier = Modifier.height(4.dp))
+
+                                        Text(
+                                            text = it,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
-                                ) {
-                                    Text("Delete")
-                                }
                             }
                         }
 
@@ -310,7 +343,8 @@ fun DashboardScreen(
 
                         Text(
                             text = "Current Mileage",
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
                         Text(
@@ -318,14 +352,15 @@ fun DashboardScreen(
                                 stats.estimatedMileage,
                                 distanceUnit
                             ),
-                            style = MaterialTheme.typography.displaySmall
+                            style = MaterialTheme.typography.displayMedium
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = "Last Refuel Date: ${formatDate(stats.lastRefuelDate)}",
-                            style = MaterialTheme.typography.bodyMedium
+                            text = "Last refuel • ${formatDate(stats.lastRefuelDate)}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
