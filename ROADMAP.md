@@ -1,368 +1,335 @@
 # 🛣 Fuel Garage Development Roadmap
 
----
-
-## Current Status
-
-Fuel Garage now has a strong and polished MVP foundation:
-
-* Vehicle add, edit, delete
-* Fuel entry add, edit, delete
-* Dynamic fuel history with entry numbers
-* Monthly grouped fuel history
-* Dashboard statistics and recent fills
-* Vehicle and fuel-entry validation
-* Chronology validation with hard blocks
-* Soft warnings for inserted entries
-* Intelligent three-way fuel calculator
-* Previous-value defaults and recalculation
-* Settings for theme, units, and currency
-* Local backup and restore using JSON
-* CSV export for spreadsheet-friendly data
-* Android Storage Access Framework export/import flow
-* Post-export sharing through Android share sheet
-* Polished empty states for vehicles and fuel entries
-* Dark theme support
-* Device-tested backup and export flows
-
-The app remains offline-first and does not require accounts, Firebase, Google Drive SDK, or cloud sign-in.
-
----
-
-## Phase 1 - MVP Completion
-
-### Vehicle Management
-
-* [x] Add Vehicle
-* [x] Edit Vehicle
-* [x] Delete Vehicle
-* [x] Vehicle validation
-* [x] Vehicle name formatting
-
-### Fuel Entries
-
-* [x] Add Fuel Entry
-* [x] Edit Fuel Entry
-* [x] Delete Fuel Entry
-* [x] Chronology validation
-* [x] Soft warning for inserted entries
-* [x] Previous-value defaults
-* [x] Recalculate defaults when latest entry is deleted
-* [x] Odometer value supports 0 km
-* [x] Intelligent three-way fuel calculations
-* [x] Editable fuel quantity
-* [x] Numeric input validation
-* [x] Crash prevention for invalid numeric input
-
-### Dashboard
-
-* [x] Basic Dashboard
-* [x] Vehicle statistics
-* [x] Current mileage
-* [x] Average mileage
-* [x] Cost per km
-* [x] Recent fills
-* [x] Empty recent-fills state
-
-### History
-
-* [x] Fuel History Screen
-* [x] Dynamic entry numbers
-* [x] Edit fuel entry
-* [x] Delete fuel entry
-* [x] Empty history state
-* [x] Monthly grouping
-* [ ] Filtering
-
-### Settings
-
-* [x] Theme setting
-* [x] Distance unit setting
-* [x] Fuel unit setting
-* [x] Currency setting
-* [x] Polished option picker dialogs
-
----
-
-## Phase 2 - Data Safety
-
-### Backup and Restore
-
-* [x] Versioned backup model
-* [x] JSON backup export
-* [x] JSON backup import
-* [x] Replace-style restore
-* [x] Transaction-safe Room restore
-* [x] Storage Access Framework integration
-* [x] Export/import confirmation dialogs
-* [x] JSON-only import guidance
-* [x] Device-tested JSON export/import
-* [x] Invalid import scenarios verified
+------------------------------------------------------------------------
+
+# Current Status
+
+Fuel Garage now has a polished, feature-complete MVP with a modern
+Material 3 interface.
+
+Implemented:
+
+-   Vehicle add, edit, delete
+-   Fuel entry add, edit, delete
+-   Intelligent three-way fuel calculator
+-   Dynamic fuel history with entry numbers
+-   Monthly grouped history
+-   Dashboard statistics and recent fills
+-   Vehicle and fuel-entry validation
+-   Chronology validation with hard blocks
+-   Soft warnings for inserted entries
+-   Previous-value defaults
+-   Live fuel calculations while typing
+-   Settings for theme, units and currency
+-   Local JSON backup and restore
+-   CSV export
+-   Android Storage Access Framework
+-   Android share sheet integration
+-   Dark theme support
+-   Polished empty states
+-   Animated onboarding FAB for first-time users
+-   Complete UI refresh across Home, Dashboard, History and Fuel Entry
+    screens
+
+Fuel Garage remains:
+
+-   Offline-first
+-   Privacy-friendly
+-   No accounts
+-   No Firebase
+-   No cloud dependency
+-   No Google Drive SDK
+-   No sign-in required
+
+------------------------------------------------------------------------
+
+# Phase 1 -- MVP Completion
+
+## Vehicle Management
+
+-   [x] Add Vehicle
+-   [x] Edit Vehicle
+-   [x] Delete Vehicle
+-   [x] Vehicle validation
+-   [x] Vehicle name formatting
+
+## Fuel Entries
+
+-   [x] Add Fuel Entry
+-   [x] Edit Fuel Entry
+-   [x] Delete Fuel Entry
+-   [x] Chronology validation
+-   [x] Soft warning for inserted entries
+-   [x] Previous-value defaults
+-   [x] Intelligent three-way fuel calculator
+-   [x] Editable fuel quantity
+-   [x] Numeric validation
+-   [x] Odometer supports 0 km
+-   [x] Crash prevention for invalid numeric input
+
+## Dashboard
+
+-   [x] Dashboard
+-   [x] Vehicle statistics
+-   [x] Hero mileage card
+-   [x] Current mileage
+-   [x] Average mileage
+-   [x] Cost per km
+-   [x] Recent fills
+-   [x] Empty recent-fills state
+-   [x] Dashboard UI refresh
+
+## History
+
+-   [x] Fuel History
+-   [x] Monthly grouping
+-   [x] Dynamic entry numbers
+-   [x] Edit fuel entry
+-   [x] Delete fuel entry
+-   [x] Empty history state
+-   [x] History UI refresh
+-   [ ] Search
+-   [ ] Filtering
+
+## Settings
+
+-   [x] Theme
+-   [x] Distance Unit
+-   [x] Fuel Unit
+-   [x] Currency
+-   [x] Polished option dialogs
+
+------------------------------------------------------------------------
 
-### Export
+# Phase 2 -- Data Safety
 
-* [x] CSV export
-* [x] Post-export share option
-* [x] Device-tested CSV export/share
-* [ ] Excel export
+## Backup & Restore
 
-### Future Cloud Options
+-   [x] Versioned backup model
+-   [x] JSON export
+-   [x] JSON restore
+-   [x] Replace-style restore
+-   [x] Transaction-safe Room restore
+-   [x] SAF integration
+-   [x] Confirmation dialogs
+-   [x] JSON validation
+-   [x] Device-tested export/import
+-   [x] Invalid restore testing
 
-* [ ] Optional cloud sync research
-* [ ] Optional app-owned automatic local backups
-* [ ] Google Drive backup research
-* [ ] Cloud sync
-* [ ] Multi-device support
+## Export
 
-**Note:** Google Drive SDK and sign-in remain intentionally excluded from the current backup strategy.
+-   [x] CSV export
+-   [x] Share exported CSV
+-   [ ] Excel export
 
----
+Cloud functionality intentionally postponed.
 
-## Phase 3 - Usability Improvements
+------------------------------------------------------------------------
 
-### Search and Filtering
+# Phase 3 -- UI Polish ✅
 
-* [ ] Search fuel history
-* [ ] Filter by date
-* [ ] Filter by mileage range
-* [ ] Filter by cost range
-* [ ] Sort history options
+## Home Screen
 
-### Quality of Life
+-   [x] Vehicle card redesign
+-   [x] Current mileage emphasis
+-   [x] Improved empty mileage state
+-   [x] Consistent FAB
+-   [x] Better typography
+-   [x] Material 3 polish
 
-* [x] Reuse previous amount and fuel price
-* [x] Recalculate defaults when latest entry is deleted
-* [x] Empty states
-* [ ] Quick add entry
-* [ ] Recent fill details
-* [ ] Better success/error feedback across all forms
+## Dashboard
 
-### Visual Polish
+-   [x] Hero card redesign
+-   [x] Statistics polish
+-   [x] Better visual hierarchy
+-   [x] Recent fills polish
+-   [x] Animated onboarding FAB
 
-* [ ] Final app icon
-* [ ] Splash screen polish
-* [ ] Final color and typography pass
-* [ ] Small-screen layout QA
-* [ ] Dark-theme QA
-* [ ] About screen
+## History
 
----
+-   [x] Redesigned fuel cards
+-   [x] Odometer emphasis
+-   [x] Compact fuel details
+-   [x] Full Tank chip
+-   [x] Better typography
+-   [x] Animated onboarding FAB
 
-## Phase 4 - Statistics and Insights
+## Fuel Entry
 
-### Statistics Screen
+-   [x] Section headers
+-   [x] Intelligent calculator helper text
+-   [x] Full Tank switch
+-   [x] Improved visual hierarchy
 
-* [ ] Statistics Screen
-* [ ] Mileage charts
-* [ ] Fuel cost charts
-* [ ] Cost per km trend
-* [ ] Fuel price trend
-* [ ] Time filters
-* [ ] Best mileage
-* [ ] Worst mileage
-* [ ] Total distance summary
-* [ ] Total fuel summary
-* [ ] Total cost summary
+**Status:** UI Refresh Complete
 
-### Reports
+------------------------------------------------------------------------
 
-* [ ] Monthly fuel summary
-* [ ] Per-vehicle report
-* [ ] Best/worst mileage insights
-* [ ] Fuel consumption reports
+# Phase 4 -- Play Store Readiness
 
----
+## About Screen
 
-## Phase 5 - Maintenance Tracker
+-   [ ] About screen
+-   [ ] App version
+-   [ ] Privacy-first message
+-   [ ] Open source acknowledgements (optional)
 
-### Service Records
+## Branding
 
-* [ ] Service records
-* [ ] Oil change tracking
-* [ ] Insurance renewal tracking
-* [ ] PUC reminders
+-   [ ] Final launcher icon
+-   [ ] Splash screen polish
+-   [ ] Feature graphic
 
-### Notifications
+## Legal
 
-* [ ] Service due reminders
-* [ ] Insurance renewal alerts
-* [ ] Maintenance notifications
+-   [ ] Privacy Policy
+-   [ ] Play Store Data Safety form
 
----
+## Store Assets
 
-## Phase 6 - Advanced and Fleet Features
+-   [ ] Screenshots
+-   [ ] Store description
+-   [ ] Release notes
 
-### Fuel Insights
+------------------------------------------------------------------------
 
-* [ ] Fuel price trends
-* [ ] Cost per km trends
-* [ ] Fuel consumption reports
+# Phase 5 -- Insights
 
-### Synchronization
+> Dashboard already provides summary statistics. Instead of a
+> traditional Statistics screen, Fuel Garage will evolve into an
+> **Insights** screen.
 
-* [ ] Cloud sync
-* [ ] Multi-device support
+-   [ ] Best mileage
+-   [ ] Worst mileage
+-   [ ] Average fuel price
+-   [ ] Fuel price trends
+-   [ ] Mileage trends
+-   [ ] Cost trends
+-   [ ] Monthly summaries
+-   [ ] Charts
+-   [ ] Time filters
 
-### Fleet Features
+------------------------------------------------------------------------
 
-* [ ] Multiple drivers
-* [ ] Fleet dashboard
-* [ ] Shared vehicles
+# Phase 6 -- Quality of Life
 
----
+-   [ ] Search fuel history
+-   [ ] Filter history
+-   [ ] Sort history
+-   [ ] Quick add entry
+-   [ ] Recent fill details
+-   [ ] Better success feedback
 
-## Planned Screens
+------------------------------------------------------------------------
 
-### Home Screen
+# Phase 7 -- Maintenance Tracker
 
-* [x] Vehicle list
-* [ ] Default vehicle
-* [ ] Quick add vehicle
+-   [ ] Service history
+-   [ ] Oil changes
+-   [ ] Insurance renewal
+-   [ ] PUC tracking
+-   [ ] Maintenance reminders
 
-### Dashboard Screen
+------------------------------------------------------------------------
 
-* [x] Current mileage
-* [x] Vehicle statistics
-* [x] Recent fuel fills
-* [ ] Recent fill details
+# Phase 8 -- Future Enhancements
 
-### Fuel Entry Screen
+## Vehicle Enhancements
 
-* [x] Add fuel entry
-* [x] Edit fuel entry
-* [x] Mileage calculation support
-* [x] Intelligent three-way fuel calculator
-* [x] Editable fuel quantity
-* [x] Odometer supports 0 km
-* [x] Numeric input validation
+-   [ ] Tank capacity
+-   [ ] Estimated fuel remaining
+-   [ ] Estimated driving range
+-   [ ] Overfill warnings
 
-### Fuel History Screen
+## Fleet & Sync
 
-* [x] Fuel entries
-* [x] Edit/delete
-* [x] Monthly grouping
-* [ ] Filtering
+-   [ ] Automatic local backups
+-   [ ] Optional cloud sync
+-   [ ] Multi-device sync
+-   [ ] Multiple drivers
+-   [ ] Shared vehicles
+-   [ ] Fleet dashboard
 
-### Statistics Screen
+------------------------------------------------------------------------
 
-* [ ] Trend charts
-* [ ] Mileage analytics
-* [ ] Fuel cost analysis
+# Testing Checklist
 
-### Settings Screen
+## Functional
 
-* [x] Backup and restore
-* [x] Export data
-* [x] Theme settings
-* [ ] About
+-   [x] Mileage calculations
+-   [x] Multi-vehicle switching
+-   [x] Chronology validation
+-   [x] Fuel calculator
+-   [x] Dashboard metrics
+-   [x] Backup & Restore
+-   [x] CSV export
 
----
+## UI
 
-## Testing Checklist
+-   [x] Empty states
+-   [x] Material 3 polish
+-   [ ] Small devices
+-   [ ] Tablets
+-   [ ] Landscape
+-   [ ] Dark-theme QA
 
-### Functional Testing
+## Data
 
-* [x] Mileage calculation accuracy
-* [x] Multi-vehicle switching
-* [x] Fuel entry validation
-* [x] Dashboard metrics
-* [x] Backup export/import
-* [x] CSV export
-* [x] Restore rollback behavior
+-   [x] Restore rollback
+-   [x] Invalid JSON
+-   [x] Unsupported backup version
+-   [ ] Migration testing
 
-### UI Testing
+------------------------------------------------------------------------
 
-* [ ] Small devices
-* [ ] Tablets
-* [ ] Landscape mode
-* [ ] Dark theme
-* [x] Empty states
-* [x] Export/import flows
+# Play Store Release Checklist
 
-### Data Testing
+## Core Features
 
-* [ ] Migration testing
-* [ ] Database integrity
-* [x] Backup restoration
-* [x] Restore with invalid JSON
-* [x] Restore with unsupported backup version
+-   [x] Vehicle CRUD
+-   [x] Fuel Entry CRUD
+-   [x] Dashboard
+-   [x] History
+-   [x] Settings
+-   [x] Backup & Restore
+-   [x] CSV Export
 
----
+## Polish
 
-## Play Store Release Checklist
+-   [x] UI Refresh
+-   [x] Empty States
+-   [x] Animated onboarding FAB
+-   [x] Dark Mode
+-   [ ] About Screen
+-   [ ] Final App Icon
+-   [ ] Splash Screen
+-   [ ] Privacy Policy
 
-### Core Functionality
+## Store Assets
 
-* [x] Vehicle CRUD
-* [x] Fuel Entry CRUD
-* [x] Dashboard basics
-* [x] History Screen
-* [x] Settings Screen
-* [x] Backup and Restore
-* [ ] Statistics Screen
+-   [ ] Screenshots
+-   [ ] Feature Graphic
+-   [ ] Store Listing
+-   [ ] Release Notes
 
-### Quality
+------------------------------------------------------------------------
 
-* [x] Empty States
-* [x] Basic error handling
-* [x] Dark mode support
-* [x] Backup/restore manual QA
-* [ ] Final app icon
-* [ ] Splash screen
-* [ ] Privacy policy
+# Current Sprint
 
-### Store Assets
+1.  About Screen
+2.  Privacy Policy
+3.  Final App Icon
+4.  Splash Screen polish
+5.  Small-screen QA
+6.  Dark-theme QA
+7.  Play Store assets
 
-* [ ] Screenshots
-* [ ] Feature graphic
-* [ ] Store listing content
-* [ ] Release notes
+------------------------------------------------------------------------
 
----
+# Next Milestone
 
-## Recommended Development Order
+🚀 **Fuel Garage v1.0 (Play Store Release)**
 
-### Sprint 1 - App Identity and Polish
-
-* Finalize launcher icon
-* Finalize splash screen
-* Add About screen
-* Final pass on settings, empty states, and dialogs
-* Small-device QA
-* Dark-theme QA
-
-### Sprint 2 - Statistics and Insights
-
-* Build statistics screen
-* Add mileage charts
-* Add fuel-cost charts
-* Add report summaries
-
-### Sprint 3 - History Enhancements
-
-* Add search
-* Add filtering
-* Add sorting
-
-### Future Enhancements
-
-* Optional tank capacity per vehicle
-* Estimated fuel remaining
-* Estimated driving range
-* Overfill warnings
-
----
-
-## Current Sprint
-
-### Active Tasks
-
-* Finalize app icon
-* Finalize splash screen
-* Add About screen
-* Small-screen QA
-* Dark-theme QA
-
-### Next Milestone
-
-Prepare Fuel Garage for a polished Play Store v1 release, then move into the Statistics screen and advanced insights.
+After the v1.0 release, development will focus on the new **Insights**
+screen, history search/filtering, maintenance tracking, and additional
+quality-of-life improvements.
