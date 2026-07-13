@@ -37,7 +37,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.example.mileagetracker.data.entity.FuelType
 import com.example.mileagetracker.data.entity.Vehicle
 import com.example.mileagetracker.data.entity.VehicleType
@@ -45,6 +44,10 @@ import com.example.mileagetracker.ui.vehicle.VehicleDialog
 import kotlinx.coroutines.launch
 import com.example.mileagetracker.ui.vehicle.VehicleValidationDialog
 import androidx.compose.runtime.LaunchedEffect
+import com.example.mileagetracker.ui.theme.FGTypography
+import com.example.mileagetracker.ui.theme.tokens.FGSpacing
+import androidx.compose.material3.CardDefaults
+import com.example.mileagetracker.ui.theme.tokens.FGScreenDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -241,13 +244,13 @@ fun HomeScreen(
             ) {
 
                 Spacer(
-                    modifier = Modifier.height(24.dp)
+                    modifier = Modifier.height(FGSpacing.XXL)
                 )
 
                 Text(
                     text = "Fuel Garage",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(16.dp)
+                    style = FGTypography.SectionTitle,
+                    modifier = Modifier.padding(FGScreenDefaults.ContentPadding)
                 )
 
                 HorizontalDivider()
@@ -333,15 +336,15 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(16.dp),
+                    .padding(FGScreenDefaults.ContentPadding),
 
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(FGScreenDefaults.SectionSpacing)
 
             ) {
 
                 item {
                     Spacer(
-                        modifier = Modifier.height(4.dp)
+                        modifier = Modifier.height(FGScreenDefaults.TopSpacing)
                     )
                 }
 
@@ -350,13 +353,16 @@ fun HomeScreen(
                     item {
 
                         Card(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
                         ) {
 
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(32.dp),
+                                    .padding(FGSpacing.XXXL),
 
                                 horizontalAlignment = Alignment.CenterHorizontally,
 
@@ -369,21 +375,21 @@ fun HomeScreen(
                                 )
 
                                 Spacer(
-                                    modifier = Modifier.height(16.dp)
+                                    modifier = Modifier.height(FGSpacing.LG)
                                 )
 
                                 Text(
                                     text = "No vehicles added yet",
-                                    style = MaterialTheme.typography.titleLarge
+                                    style = FGTypography.SectionTitle
                                 )
 
                                 Spacer(
-                                    modifier = Modifier.height(8.dp)
+                                    modifier = Modifier.height(FGSpacing.SM)
                                 )
 
                                 Text(
                                     text = "Tap + to add your first vehicle",
-                                    style = MaterialTheme.typography.bodyMedium
+                                    style = FGTypography.Body
                                 )
                             }
                         }

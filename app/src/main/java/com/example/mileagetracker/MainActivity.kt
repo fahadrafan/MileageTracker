@@ -9,7 +9,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.mileagetracker.navigation.AppNavigation
-import com.example.mileagetracker.ui.theme.MileageTrackerTheme
+import com.example.mileagetracker.ui.theme.FuelGarageTheme
 import com.example.mileagetracker.data.preferences.UserPreferencesRepository
 import com.example.mileagetracker.data.preferences.model.ThemeMode
 import com.example.mileagetracker.ui.settings.SettingsViewModel
@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
 
             val themeMode by settingsViewModel.themeMode.collectAsState()
 
-            MileageTrackerTheme(
+            FuelGarageTheme(
 
                 darkTheme = when (themeMode) {
 

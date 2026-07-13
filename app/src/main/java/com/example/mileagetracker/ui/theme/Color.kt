@@ -2,10 +2,46 @@ package com.example.mileagetracker.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+/* -------------------------------------------------------
+   Fuel Garage Brand Colors
+------------------------------------------------------- */
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+/* Light Theme */
+val FGPrimaryLight = Color(0xFF2563EB)
+val FGSecondaryLight = Color(0xFF4F8EF7)
+
+val FGBackgroundLight = Color(0xFFF7F8FA)
+val FGSurfaceLight = Color(0xFFFFFFFF)
+
+val FGSuccess = Color(0xFF2E7D32)
+val FGErrorLight = Color(0xFFD32F2F)
+
+val FGDividerLight = Color(0xFFE5E7EB)
+
+val FGOnPrimaryLight = Color(0xFFFFFFFF)
+val FGOnSecondaryLight = Color(0xFFFFFFFF)
+
+val FGOnBackgroundLight = Color(0xFF111827)
+val FGOnSurfaceLight = Color(0xFF111827)
+
+val FGTextSecondaryLight = Color(0xFF6B7280)
+
+/* Dark Theme */
+
+val FGPrimaryDark = Color(0xFF2563EB)
+val FGSecondaryDark = Color(0xFF4F8EF7)
+
+val FGBackgroundDark = Color(0xFF1A1A1A)
+val FGSurfaceDark = Color(0xFF2A2A2A)
+
+val FGErrorDark = Color(0xFFEF5350)
+
+val FGDividerDark = Color(0xFF3A3A3A)
+
+val FGOnPrimaryDark = Color(0xFFFFFFFF)
+val FGOnSecondaryDark = Color(0xFFFFFFFF)
+
+val FGOnBackgroundDark = Color(0xFFF5F5F5)
+val FGOnSurfaceDark = Color(0xFFF5F5F5)
+
+val FGTextSecondaryDark = Color(0xFFCFCFCF)

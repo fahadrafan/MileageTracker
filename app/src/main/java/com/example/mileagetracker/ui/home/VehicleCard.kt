@@ -1,6 +1,5 @@
 package com.example.mileagetracker.ui.home
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +23,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.mileagetracker.data.preferences.UserPreferencesRepository
 import com.example.mileagetracker.data.preferences.model.DistanceUnit
 import com.example.mileagetracker.utils.formatMileage
+import com.example.mileagetracker.ui.theme.FGTypography
+import com.example.mileagetracker.ui.theme.tokens.FGSpacing
+import androidx.compose.material3.CardDefaults
+import com.example.mileagetracker.ui.theme.tokens.FGCardDefaults
+import com.example.mileagetracker.ui.components.cards.FGCard
 
 @Composable
 fun VehicleCard(
@@ -51,32 +55,31 @@ fun VehicleCard(
     var showMenu by remember {
         mutableStateOf(false)
     }
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
+    FGCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(FGCardDefaults.ContentPadding),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row {
                 Text(
                     text = if (type == "CAR") "🚗" else "🏍",
-                    style = MaterialTheme.typography.titleLarge
+                    style = FGTypography.SectionTitle
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(FGSpacing.MD))
                 Column {
                     Text(
                         text = name,
-                        style = MaterialTheme.typography.titleMedium
+                        style = FGTypography.CardTitle
                     )
                     if (registrationNumber.isNotBlank()) {
                         Text(
                             text = registrationNumber,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = FGTypography.Caption
                         )
                     }
                     Text(
@@ -84,7 +87,7 @@ fun VehicleCard(
                             type.lowercase()
                                 .replaceFirstChar { it.uppercase() }
                         }",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = FGTypography.Caption
                     )
                 }
             }
@@ -105,12 +108,12 @@ fun VehicleCard(
 
                             Text(
                                 text = formatMileage(mileage, distanceUnit),
-                                style = MaterialTheme.typography.headlineSmall
+                                style = FGTypography.ScreenTitle
                             )
 
                             Text(
                                 text = "Current Mileage",
-                                style = MaterialTheme.typography.labelMedium,
+                                style = FGTypography.Label,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
 
@@ -118,12 +121,12 @@ fun VehicleCard(
 
                             Text(
                                 text = "No data",
-                                style = MaterialTheme.typography.titleMedium
+                                style = FGTypography.CardTitle
                             )
 
                             Text(
                                 text = "No fuel entries yet",
-                                style = MaterialTheme.typography.labelMedium,
+                                style = FGTypography.Label,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
