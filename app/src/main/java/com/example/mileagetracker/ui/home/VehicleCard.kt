@@ -1,7 +1,6 @@
 package com.example.mileagetracker.ui.home
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
@@ -11,7 +10,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -25,7 +23,6 @@ import com.example.mileagetracker.data.preferences.model.DistanceUnit
 import com.example.mileagetracker.utils.formatMileage
 import com.example.mileagetracker.ui.theme.FGTypography
 import com.example.mileagetracker.ui.theme.tokens.FGSpacing
-import androidx.compose.material3.CardDefaults
 import com.example.mileagetracker.ui.theme.tokens.FGCardDefaults
 import com.example.mileagetracker.ui.components.cards.FGCard
 
@@ -173,7 +170,6 @@ fun VehicleCard(
                         }
                     }
                 }
-
             }
         }
     }

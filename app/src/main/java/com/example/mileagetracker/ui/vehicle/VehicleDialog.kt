@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.example.mileagetracker.ui.components.fields.FGOutlinedTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +43,7 @@ fun VehicleDialog(
 
         text = {
             Column {
-                OutlinedTextField(
+                FGOutlinedTextField(
                     value = vehicleName,
                     onValueChange = onVehicleNameChange,
                     modifier = Modifier
@@ -72,7 +73,7 @@ fun VehicleDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedTextField(
+                FGOutlinedTextField(
                     value = registrationNumber,
                     onValueChange = {
                         onRegistrationChange(it.uppercase())

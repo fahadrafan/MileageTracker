@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.material3.Checkbox
 import androidx.compose.ui.Alignment
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,6 +30,15 @@ import com.example.mileagetracker.data.preferences.UserPreferencesRepository
 import com.example.mileagetracker.data.preferences.model.Currency
 import com.example.mileagetracker.data.preferences.model.DistanceUnit
 import com.example.mileagetracker.data.preferences.model.FuelUnit
+import com.example.mileagetracker.ui.components.fields.FGOutlinedTextField
+import com.example.mileagetracker.ui.components.screen.FGScreen
+import com.example.mileagetracker.ui.components.topbar.FGTopBar
+import com.example.mileagetracker.ui.components.section.FGSectionHeader
+import com.example.mileagetracker.ui.components.dialogs.FGDialog
+import com.example.mileagetracker.ui.components.buttons.FGPrimaryButton
+import com.example.mileagetracker.ui.components.buttons.FGSecondaryButton
+import com.example.mileagetracker.ui.components.fields.FGSwitch
+import com.example.mileagetracker.ui.theme.tokens.FGSpacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,14 +128,13 @@ fun FuelEntryScreen(
     }
 
     uiState.chronologyError?.let { error ->
-        AlertDialog(
+        FGDialog(
             onDismissRequest = { },
-            title = { Text("Cannot Save") },
-            text = { Text(error) },
-            confirmButton = {
-                TextButton(
-                    onClick = { viewModel.clearChronologyError() }
-                ) { Text("OK") }
+            title = "Cannot Save",
+            message = error,
+            confirmText = "OK",
+            onConfirm = {
+                viewModel.clearChronologyError()
             }
         )
     }
@@ -173,30 +180,21 @@ fun FuelEntryScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        if (!isEditMode) "Add Fuel"
-                        else "Edit Fuel Entry"
-                    )
-                }
+            FGTopBar(
+                title = if (!isEditMode) "Add Fuel" else "Edit Fuel Entry",
+                onBackClick = onBack
             )
         }
     ) { padding ->
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        FGScreen(
+            contentPadding = padding
         ) {
 
-            Text(
-                text = "Refuel Details",
-                style = MaterialTheme.typography.titleMedium
+            FGSectionHeader(
+                title = "Refuel Details"
             )
-            OutlinedTextField(
+            FGOutlinedTextField(
                 value = uiState.refillDateText,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 onValueChange = { viewModel.updateDateText(it) },
@@ -230,7 +228,7 @@ fun FuelEntryScreen(
                 )
             }
 
-            OutlinedTextField(
+            FGOutlinedTextField(
                 value = uiState.odometer,
                 onValueChange = { viewModel.updateOdometer(it) },
                 isError = uiState.odometerError != null,
@@ -272,18 +270,12 @@ fun FuelEntryScreen(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = "Fuel Details",
-                style = MaterialTheme.typography.titleMedium
+            FGSectionHeader(
+                title = "Fuel Details",
+                subtitle = "Enter any two values to calculate the third."
             )
 
-            Text(
-                text = "Enter any two values to calculate the third.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            OutlinedTextField(
+            FGOutlinedTextField(
                 value = uiState.amountPaid,
                 keyboardOptions =
                     KeyboardOptions(
@@ -303,7 +295,7 @@ fun FuelEntryScreen(
                 )
             }
 
-            OutlinedTextField(
+            FGOutlinedTextField(
                 value = uiState.fuelPrice,
                 onValueChange = { viewModel.updateFuelPrice(it) },
                 isError = uiState.fuelPriceError != null,
@@ -330,7 +322,7 @@ fun FuelEntryScreen(
                 )
             }
 
-            OutlinedTextField(
+            FGOutlinedTextField(
                 value = uiState.fuelQuantity,
                 onValueChange = { viewModel.updateLitres(it) },
                 keyboardOptions = KeyboardOptions(
@@ -354,14 +346,14 @@ fun FuelEntryScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                Switch(
+                FGSwitch(
                     checked = uiState.fullTank,
                     onCheckedChange = {
                         viewModel.updateFullTank(it)
                     }
                 )
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(FGSpacing.MD))
 
                 Text(
                     text = "Full Tank",
@@ -373,29 +365,19 @@ fun FuelEntryScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedButton(
-                    onClick = {
-                        onBack()
-                    },
+                FGSecondaryButton(
+                    text = if (isEditMode) "Discard" else "Cancel",
+                    onClick = onBack,
                     modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        if (isEditMode) "Discard"
-                        else "Cancel"
-                    )
-                }
-                Button(
+                )
+
+                FGPrimaryButton(
+                    text = if (isEditMode) "Update" else "Save",
                     onClick = {
                         viewModel.saveFuel(vehicleId)
                     },
                     modifier = Modifier.weight(1f)
-                ) {
-
-                    Text(
-                        if (isEditMode) "Update"
-                        else "Save"
-                    )
-                }
+                )
             }
         }
     }
