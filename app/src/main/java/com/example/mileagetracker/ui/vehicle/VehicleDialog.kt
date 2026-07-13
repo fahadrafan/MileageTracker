@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.example.mileagetracker.ui.components.fields.FGOutlinedTextField
+import com.example.mileagetracker.ui.components.fields.FGDropdownField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,30 +88,16 @@ fun VehicleDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Text("Fuel Type")
-
-                ExposedDropdownMenuBox(
+                FGDropdownField(
+                    label = {
+                        Text("Fuel Type")
+                    },
+                    value = selectedFuelType.name
+                        .lowercase()
+                        .replaceFirstChar { it.uppercase() },
                     expanded = fuelTypeExpanded,
-                    onExpandedChange = {
-                        onFuelExpandedChange(!fuelTypeExpanded)
-                    }
+                    onExpandedChange = onFuelExpandedChange
                 ) {
-
-                    OutlinedTextField(
-                        value = selectedFuelType.name
-                            .lowercase()
-                            .replaceFirstChar { it.uppercase() },
-                        onValueChange = {},
-                        readOnly = true,
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth(),
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(
-                                expanded = fuelTypeExpanded
-                            )
-                        }
-                    )
 
                     ExposedDropdownMenu(
                         expanded = fuelTypeExpanded,
@@ -139,30 +126,16 @@ fun VehicleDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Text("Vehicle Type")
-
-                ExposedDropdownMenuBox(
+                FGDropdownField(
+                    label = {
+                        Text("Vehicle Type")
+                    },
+                    value = selectedType.name
+                        .lowercase()
+                        .replaceFirstChar { it.uppercase() },
                     expanded = vehicleTypeExpanded,
-                    onExpandedChange = {
-                        onVehicleExpandedChange(!vehicleTypeExpanded)
-                    }
+                    onExpandedChange = onVehicleExpandedChange
                 ) {
-
-                    OutlinedTextField(
-                        value = selectedType.name
-                            .lowercase()
-                            .replaceFirstChar { it.uppercase() },
-                        onValueChange = {},
-                        readOnly = true,
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth(),
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(
-                                expanded = vehicleTypeExpanded
-                            )
-                        }
-                    )
 
                     ExposedDropdownMenu(
                         expanded = vehicleTypeExpanded,
