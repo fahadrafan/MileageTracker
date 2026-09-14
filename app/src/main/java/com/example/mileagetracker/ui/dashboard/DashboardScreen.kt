@@ -296,6 +296,9 @@ fun DashboardScreen(
             ExtendedFloatingActionButton(
                 onClick = onAddFuelClick,
 
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+
                 expanded = uiState.recentEntries.isEmpty() && showExtendedFab,
 
                 icon = {

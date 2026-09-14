@@ -218,12 +218,13 @@ Implemented:
 Status: Frozen
 
 Implemented:
-
 -   Refuel Details section
 -   Fuel Details section
 -   Intelligent calculator helper text
 -   Full Tank switch
 -   Improved hierarchy
+-   Keyboard-aware scrolling and IME padding
+-   Transparent input field styling for seamless blending
 
 ## Settings
 
@@ -319,6 +320,8 @@ Before major changes:
 ❌ Break chronology validation.
 
 ❌ Replace Material 3 with custom design language.
+
+❌ Use hardcoded system bar colors (always use dynamic `enableEdgeToEdge`).
 
 ❌ Introduce unnecessary complexity.
 

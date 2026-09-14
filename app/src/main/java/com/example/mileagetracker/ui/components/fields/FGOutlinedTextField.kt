@@ -10,6 +10,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 //import androidx.compose.ui.text.input.KeyboardActions
 //import androidx.compose.ui.text.input.KeyboardOptions
@@ -61,14 +62,14 @@ fun FGOutlinedTextField(
             textStyle = MaterialTheme.typography.bodyLarge,
 
             colors = OutlinedTextFieldDefaults.colors(
-
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                errorContainerColor = Color.Transparent,
 
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.55f),
-                disabledBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
+                unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                disabledBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
                 errorBorderColor = MaterialTheme.colorScheme.error,
 
                 focusedLabelColor = MaterialTheme.colorScheme.primary,
@@ -83,7 +84,14 @@ fun FGOutlinedTextField(
                 cursorColor = MaterialTheme.colorScheme.primary,
 
                 focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+
+                errorLabelColor = MaterialTheme.colorScheme.error,
+
+                // Force background colors on text field fields explicitly to fix character background overlays
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                errorTextColor = MaterialTheme.colorScheme.onSurface
             )
         )
 

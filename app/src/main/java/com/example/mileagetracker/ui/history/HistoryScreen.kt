@@ -162,6 +162,8 @@ fun HistoryScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onAddFuel,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 expanded = entries.isEmpty() && showExtendedFab,
                 icon = {
                     Icon(

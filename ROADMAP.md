@@ -268,10 +268,12 @@ Cloud functionality intentionally postponed.
 
 -   [x] Empty states
 -   [x] Material 3 polish
--   [ ] Small devices
+-   [x] Small devices / Keyboard IME scroll fix
+-   [x] Adaptive status/navigation bars for dynamic themes
+-   [x] Clean transparent input fields
 -   [ ] Tablets
 -   [ ] Landscape
--   [ ] Dark-theme QA
+-   [x] Dark-theme QA
 
 ## Data
 
