@@ -343,29 +343,42 @@ fun DashboardScreen(
                                 Row(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    AssistChip(
+                                    SuggestionChip(
                                         onClick = {},
-                                        enabled = false,
                                         label = {
                                             uiState.selectedVehicle?.type?.name
                                                 ?.lowercase()
                                                 ?.replaceFirstChar { it.uppercase() }
                                                 ?.let { Text(it) }
-                                        }
+                                        },
+                                        colors = SuggestionChipDefaults.suggestionChipColors(
+                                            labelColor = MaterialTheme.colorScheme.primary
+                                        ),
+                                        border = SuggestionChipDefaults.suggestionChipBorder(
+                                            enabled = true,
+                                            borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                            borderWidth = 1.dp
+                                        )
                                     )
 
-                                    AssistChip(
+                                    SuggestionChip(
                                         onClick = {},
-                                        enabled = false,
                                         label = {
                                             uiState.selectedVehicle?.fuelType?.name
                                                 ?.lowercase()
                                                 ?.replaceFirstChar { it.uppercase() }
                                                 ?.let { Text(it) }
-                                        }
+                                        },
+                                        colors = SuggestionChipDefaults.suggestionChipColors(
+                                            labelColor = MaterialTheme.colorScheme.primary
+                                        ),
+                                        border = SuggestionChipDefaults.suggestionChipBorder(
+                                            enabled = true,
+                                            borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                            borderWidth = 1.dp
+                                        )
                                     )
                                 }
-
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 uiState.selectedVehicle?.registrationNumber?.takeIf { it.isNotBlank() }
